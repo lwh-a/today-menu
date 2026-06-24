@@ -1,7 +1,7 @@
-/* src/index.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 
-/* Tailwind 기본 빌드 라인 포함 필요시 주석 해제 */
+
 /* @tailwind base; @tailwind components; @tailwind utilities; */
 
 /* ── 아워홈 TFS 크림&레드 테마 DESIGN TOKENS ─────────────────────── */
@@ -207,6 +207,149 @@ button, input, textarea, select {
 }
 
 
+/* ── FOOTER (수정 및 연동 완료) ────────────────────────────────────── */
+.site-footer { 
+  width: 100%;
+  height: 260px;
+  min-height: 260px;
+  background: #ffffff;          /* 💡 검은색 걷어내고 완벽한 하얀색으로 변경 */
+  border-top: 1px solid #e5e7eb;
+  margin-top: 64px;             /* 💡 기존 코드에서 사용하던 본문과의 간격 계승 */
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.site-footer .footer-inner { 
+  padding-top: 50px;            /* 210px 시점 머리 정렬선 */
+  display: flex;                /* 💡 기존 grid를 버리고 양끝 밀어내기 flex 채택 */
+  align-items: start;
+  justify-content: space-between;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+/* 왼쪽 영역: 로고 및 회사 상세정보 단락 전체 */
+.footer-left-zone {
+  display: flex;
+  align-items: start;
+  flex-grow: 1;
+}
+
+/* 로고 영역 정렬 및 자간 세팅 */
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 200px;                 /* 530px 정렬선을 만들기 위한 고정폭 */
+}
+
+.footer-logo-text {
+  font-size: 18px;
+  font-weight: bold;
+  color: #1f2937;
+  letter-spacing: -0.05em;      /* 💡 요청하신 칼같은 자간 수치 */
+}
+
+/* 상단 메뉴 라인 (글자 간격 45px 싱크) */
+.footer-menu {
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 16px;          /* 아래 상세정보와의 마진 */
+  white-space: nowrap;
+}
+
+.footer-menu a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.footer-menu .divider {
+  color: #d1d5db;
+  margin: 0 22.5px;             /* 좌우 합산 45px 격리선 생성 */
+  font-weight: 300;
+}
+
+/* 하단 세부 정보 (2pt 작게 설정 및 연회색톤 적용) */
+.footer-info {
+  font-size: 12px;
+  color: #9ca3af;
+  font-weight: 300;
+  line-height: 1.8;
+  white-space: nowrap;
+}
+
+.footer-info .info-row {
+  display: flex;
+  align-items: center;
+}
+
+.footer-info .divider {
+  color: #e5e7eb;
+  margin: 0 22.5px;             /* 가로선 간격 상단 메뉴와 동일하게 일치 */
+}
+
+/* 대표자 한 줄 밑으로 완벽히 정렬된 카피라이트 마진 */
+.footer-copyright {
+  margin-top: 16px;             /* 회사소개~법인명 사이 거리와 대칭 매칭 */
+  font-size: 11px;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+/* 오른쪽 영역: 패밀리 사이트 아코디언 컴포넌트 */
+.footer-accordion-wrap {
+  position: relative;
+  width: 250px;
+  font-size: 14px;
+}
+
+/* 캡슐 알약 형태의 반원형 버튼 복구 */
+.footer-accordion-btn {
+  width: 100%;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  padding: 0 20px;
+  border-radius: 9999px;        /* 💡 완벽한 라운딩 처리 */
+  color: #374151;
+  cursor: pointer;
+  outline: none;
+}
+
+/* 아래를 향해 열리는 드롭다운 메뉴 상자 위치 고정 */
+.footer-accordion-dropdown {
+  position: absolute;
+  top: 46px;                    /* 💡 버튼 아래 방향으로 6px 여백 준 시점 고정 */
+  left: 0;
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  z-index: 50;
+}
+
+.footer-accordion-dropdown a {
+  display: block;
+  padding: 10px 20px;
+  color: #374151;
+  text-decoration: none;
+}
+
+.footer-accordion-dropdown a:not(:last-child) {
+  border-bottom: 1px solid #f3f4f6;
+}
+@media (max-width: 768px) { .footer-inner { grid-template-columns: 1fr; } }
+
+
 @media (max-width: 768px) { .top-section { grid-template-columns: 1fr; } }
 
 /* 트렌드 카드 스타일 */
@@ -365,6 +508,8 @@ button, input, textarea, select {
   overflow: hidden;
   box-shadow: var(--shadow-sm);
 }
+
+
 .news-main { flex-direction: column; }
 .news-thumb-main { height: 180px; background: var(--bg-surface); display: flex; align-items: center; justify-content: center; font-size: 4rem; }
 .news-thumb { width: 80px; background: var(--bg-base); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: var(--text-light); border-right: 1px solid var(--border-color); }
