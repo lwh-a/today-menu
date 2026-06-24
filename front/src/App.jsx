@@ -57,6 +57,7 @@ export default function App() {
       <BrowserRouter>
         <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
           <Header />
+          <div id="naverIdLogin"></div>
           <main className="page-wrap" style={{ flex: 1 }}>
             <div className="container">
               <Routes>
