@@ -17,6 +17,7 @@ import MyPage  from './pages/MyPage'
 import MyPageEdit from './pages/MyPageEdit'
 import Game from './pages/Game'
 import NaverCallback from './pages/NaverCallback'
+import Footer from './components/Footer'
 
 // ── Auth Context ──────────────────────────────────────────────────────────────
 export const AuthContext = createContext(null)
@@ -77,6 +78,7 @@ export default function App() {
               </Routes>
             </div>
           </main>
+          <Footer />
           <ChatBot />
         </div>
       </BrowserRouter>
