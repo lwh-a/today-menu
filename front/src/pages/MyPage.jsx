@@ -56,7 +56,7 @@ export default function MyPage() {
     if (!locSearch.trim()) return
     setLocLoading(true); setLocResults([]); setLocMsg('')
     try {
-      const token = localStorage.getItem('access_token') || localStorage.getItem('accessToken')
+      const token = localStorage.getItem('accessToken')
       const res = await fetch(
         `/api/kakao/search?q=${encodeURIComponent(locSearch.split('&')[0])}`,
         { headers: { Authorization: `Bearer ${token}` } }
