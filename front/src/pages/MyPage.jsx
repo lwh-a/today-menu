@@ -305,7 +305,7 @@ export default function MyPage() {
           liked_logs.length > 0 ? (
             <div className="grid-4">
               {liked_logs.slice(0, 4).map((log) => (
-                <Link to={`/menu/${log.recommended_restaurant_id}`} className="card rest-card" key={log.log_id}>
+                <Link to={`/menu/${log.restaurant?.id ?? log.recommended_restaurant_id}`} className="card rest-card" key={log.log_id}>
                   <div className="card-img" style={{ fontSize: '2rem' }}>🍴</div>
                   <div className="card-body">
                     <span className="badge badge-primary">{log.restaurant?.category ?? '기타'}</span>
@@ -459,3 +459,4 @@ export default function MyPage() {
     </>
   )
 }
+
