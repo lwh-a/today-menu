@@ -55,6 +55,7 @@ def admin_required(f):
 
 # ── 직렬화 헬퍼 ───────────────────────────────────────────────────────────────
 def serialize_user(u):
+    prefs = u.preferences or {}
     return {
         'user_id':      u.user_id,
         'email':        u.email,
@@ -64,6 +65,7 @@ def serialize_user(u):
         'allergies':    u.allergies,
         'role':         u.role.value,
         'created_at':   u.created_at.isoformat() if u.created_at else None,
+        'saved_locations': prefs.get('saved_locations', []),  # [{name, address, lat, lng}]
     }
 
 def serialize_restaurant(r):
@@ -196,9 +198,27 @@ def update_me():
         user.nickname = nickname
 
     user.allergies   = data.get('allergies', user.allergies)
+    prefs = user.preferences or {}
+
+    # saved_locations: [{name, address, lat, lng}, ...] 최대 3개
+    new_locations = data.get('saved_locations', None)
+    if new_locations is not None:
+        # 최대 3개, 필수 필드 검증
+        validated = []
+        for loc in new_locations[:3]:
+            if loc.get('name') and loc.get('lat') is not None and loc.get('lng') is not None:
+                validated.append({
+                    'name':    str(loc['name'])[:30],
+                    'address': str(loc.get('address', ''))[:100],
+                    'lat':     float(loc['lat']),
+                    'lng':     float(loc['lng']),
+                })
+        prefs['saved_locations'] = validated
+
     user.preferences = {
-        'likes':    data.get('preferences', (user.preferences or {}).get('likes', [])),
-        'dislikes': data.get('dislikes',    (user.preferences or {}).get('dislikes', [])),
+        **prefs,
+        'likes':    data.get('preferences', prefs.get('likes', [])),
+        'dislikes': data.get('dislikes',    prefs.get('dislikes', [])),
     }
     db.session.commit()
     return jsonify(serialize_user(user)), 200
@@ -592,14 +612,25 @@ def chatbot():
     body    = request.get_json(force=True)
     message = body.get('message', '').strip()
     history = body.get('history', [])
-    mode    = body.get('mode', 'recommend')   # 'recommend' | 'qna'
-    lat     = body.get('lat')
-    lng     = body.get('lng')
+    mode      = body.get('mode', 'recommend')   # 'recommend' | 'qna'
+    lat       = body.get('lat')
+    lng       = body.get('lng')
+    loc_index = body.get('loc_index')   # None | 0~2 → 저장된 장소 인덱스
 
     if not message:
         return jsonify({'error': 'message is required'}), 400
 
     user, ctx = _build_user_context(user_id)
+
+    # ── loc_index 가 지정된 경우 저장된 장소 좌표 사용 ──────────────────────
+    loc_name = None
+    if loc_index is not None:
+        saved = (user.preferences or {}).get('saved_locations', [])
+        if 0 <= int(loc_index) < len(saved):
+            chosen  = saved[int(loc_index)]
+            lat     = chosen['lat']
+            lng     = chosen['lng']
+            loc_name = chosen['name']
 
     # ── 위치 기반 식당 조회 ──────────────────────────────────────────────────
     nearby_list = []
@@ -612,6 +643,8 @@ def chatbot():
         nearby_list = nearby_list[:15]
 
     nearby_str = ', '.join(nearby_list) if nearby_list else None
+    if nearby_str and loc_name:
+        nearby_str = f'[{loc_name} 근처] ' + nearby_str
 
     # ── 등록된 장소 주변 식당 (위치 미제공 시 fallback) ─────────────────────
     all_rests = [f"{r.name}({r.category})" for r in Restaurant.query.limit(30).all()]
@@ -759,6 +792,8 @@ def kakao_search():
         return jsonify({'places': places, 'total': data['meta']['total_count']}), 200
 
     except Exception as e:
+        print("KEY:", repr(kakao_key))
+        print("❌ ERROR:", e)
         return jsonify({'error': str(e)}), 500
 
 
