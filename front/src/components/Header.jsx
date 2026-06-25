@@ -3,6 +3,14 @@ import { useAuth } from '../App'
 import { logout } from '../api/services'
 import { useState } from 'react'
 
+const NAV_LINKS = [
+  { to: '/', label: '홈', end: true },
+  { to: '/menu', label: '메뉴 찾기' },
+  { to: '/party', label: '밥친구' },
+  { to: '/game', label: '🎲 게임창' },
+]
+
+
 export default function Header() {
   const { user, logout: ctxLogout } = useAuth()
   const navigate = useNavigate()
@@ -10,15 +18,22 @@ export default function Header() {
   const [writeMenuOpen, setWriteMenuOpen] = useState(false) // 글쓰기 드롭다운 상태 추가
   const [mobileOpen, setMobileOpen] = useState(false)       // 모바일 드로어 상태 추가
 
+
+  // ✅ 중복 제거된 로그아웃
   const handleLogout = () => {
     logout()
     ctxLogout()
     navigate('/')
+
+    setMobileOpen(false)
+
   }
 
   const handleSearch = (e) => {
     e.preventDefault()
+
     navigate(`/menu?q=${encodeURIComponent(q)}`)
+
   }
 
   // 모바일 메뉴용 더미 데이터 (필요에 따라 컴포넌트 외부나 내부에 선언하여 사용하세요)
@@ -32,9 +47,11 @@ export default function Header() {
     <>
       {/* ── 헤더 ── */}
       <header className="site-header">
+
         <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
 
           {/* 아워홈 TFS 스타일의 위트 있는 시계 타이틀 로고 */}
+
           <Link to="/" className="site-logo" style={{ textDecoration: 'none' }}>
             <h2 style={{
               fontSize: '1.6rem',
@@ -48,6 +65,7 @@ export default function Header() {
               margin: 0
             }}>
               오늘 뭐먹지?
+
               <span style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -57,10 +75,11 @@ export default function Header() {
               }}>
                 🕒
               </span>
+
             </h2>
           </Link>
 
-          {/* 검색 (데스크탑) */}
+          {/* ✅ 검색 */}
           <div className="header-search" style={{ flex: 1, maxWidth: 420 }}>
             <span className="search-icon">🔍</span>
             <form onSubmit={handleSearch} style={{ width: '100%' }}>
@@ -73,6 +92,7 @@ export default function Header() {
               />
             </form>
           </div>
+
 
           {/* 우측 메뉴 액션 영역 (수직 정렬 아이콘 형태) */}
           <div className="header-actions" style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
@@ -513,14 +533,17 @@ export default function Header() {
           {/* 단순 닉네임 표시 */}
           {user && (
             <span style={{ color: 'var(--text-muted)', fontSize: '.82rem', marginLeft: '12px' }}>
+
               🌿 {user.nickname}
             </span>
           )}
+
         </div>
       </nav>
 
-      {/* ── 모바일 드로어 ── */}
+      {/* ✅ 모바일 */}
       {mobileOpen && (
+
         <>
           {/* 오버레이 */}
           <div
@@ -585,8 +608,9 @@ export default function Header() {
                 </div>
               )}
             </div>
+
           </div>
-        </>
+        </div>
       )}
     </>
   )
