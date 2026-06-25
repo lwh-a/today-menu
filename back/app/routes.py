@@ -618,8 +618,9 @@ def _build_user_context(user_id):
             liked_rests.append(f"{r.name}({r.category})")
     wishlist = ', '.join(liked_rests) or '없음'
 
-    # 유저가 등록한 장소 (preferences.locations)
-    saved_locs = ', '.join((user.preferences or {}).get('locations', [])) or '없음'
+    # 유저가 등록한 저장 장소 (preferences.saved_locations)
+    raw_locs   = (user.preferences or {}).get('saved_locations', [])
+    saved_locs = ', '.join([loc.get('name','') for loc in raw_locs if loc.get('name')]) or '없음'
 
     return user, {
         'allergies':  allergies,
@@ -671,11 +672,15 @@ def chatbot():
     # ── 위치 기반 식당 조회 ──────────────────────────────────────────────────
     nearby_list = []
     if lat and lng:
-        for r in Restaurant.query.all():
-            if r.latitude and r.longitude:
-                dist = haversine(lat, lng, float(r.latitude), float(r.longitude))
-                if dist <= 1000:   # 1km 이내
-                    nearby_list.append(f"{r.name}({r.category}, {round(dist)}m)")
+        # 위도/경도 있는 식당만 필터링해서 조회 (성능 개선)
+        rests = Restaurant.query.filter(
+            Restaurant.latitude.isnot(None),
+            Restaurant.longitude.isnot(None)
+        ).all()
+        for r in rests:
+            dist = haversine(lat, lng, float(r.latitude), float(r.longitude))
+            if dist <= 1000:   # 1km 이내
+                nearby_list.append(f"{r.name}({r.category}, {round(dist)}m)")
         nearby_list = nearby_list[:15]
 
     nearby_str = ', '.join(nearby_list) if nearby_list else None
