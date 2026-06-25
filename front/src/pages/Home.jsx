@@ -1,6 +1,6 @@
 // src/pages/Home.jsx
 import { useState, useEffect, useRef } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { getRestaurants, getNearby } from '../api/services'
 import { useAuth } from '../App'
 import KakaoMap from '../components/KakaoMap'
@@ -15,7 +15,6 @@ function catIcon(c) { return CAT_ICON[c] ?? '🍴' }
 
 export default function Home() {
   const { user } = useAuth()
-  const navigate = useNavigate()
   const [trending, setTrending] = useState([])
   const [nearby, setNearby] = useState([])
   const [userLoc, setUserLoc] = useState(null)
