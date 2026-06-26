@@ -1,211 +1,252 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { getMyPage, updateMyPageProfile } from '../api/services'
+import { useAuth } from '../App'
 
-const MyPageEdit = ({ onSaveSuccess }) => {
-  const [nickname, setNickname] = useState('');
-  const [allergies, setAllergies] = useState('');
-  
-  // 💡 [필드명 통일] 선호/기피 음식 상태 관리를 likes, dislikes로 명확히 통일
-  const [likes, setLikes] = useState([]); 
-  const [dislikes, setDislikes] = useState([]);
-  
-  // 입력창 임시 상태값
-  const [inputLike, setInputLike] = useState('');
-  const [inputDislike, setInputDislike] = useState('');
-  
-  const [loading, setLoading] = useState(true);
+// 기본 선택 목록 (기존 코드 유지)
+const PREF_FOODS    = ['한식','일식','중식','양식','분식','치킨','피자','카페','채식','해산물','매운맛']
+const DISLIKE_FOODS = ['오이','고수','파','마늘','쑥갓','가지','고등어','낙지','콩','당근']
 
-  // 1. 초기 기존 유저 데이터 로드
+// 팀원 코드의 processTags 통합 — 콤마로 꼬인 데이터 정제
+const processTags = (rawPrefs) => {
+  if (!rawPrefs) return []
+  if (Array.isArray(rawPrefs)) {
+    const flat = rawPrefs.flatMap((item) =>
+      typeof item === 'string' ? item.split(',') : item
+    )
+    return [...new Set(flat.map((v) => v.trim()).filter(Boolean))]
+  }
+  return []
+}
+
+export default function MyPageEdit() {
+  const navigate   = useNavigate()
+  const { login: ctxLogin } = useAuth()
+
+  const [form, setForm] = useState({
+    nickname:    '',
+    allergies:   '',
+    preferences: [],  // likes
+    dislikes:    [],
+  })
+
+  // ── 팀원 코드: 직접 입력 태그 추가 기능 ────────────────────────────────────
+  const [inputLike,    setInputLike]    = useState('')
+  const [inputDislike, setInputDislike] = useState('')
+  const [error,        setError]        = useState('')
+  const [loading,      setLoading]      = useState(false)
+  const [dataLoading,  setDataLoading]  = useState(true)
+
+  // ── 기존 데이터 로드 ────────────────────────────────────────────────────────
   useEffect(() => {
-    const loadUserData = async () => {
-      try {
-        const token = localStorage.getItem('access_token');
-        if (!token) {
-          alert('로그인이 필요합니다.');
-          return;
-        }
+    getMyPage()
+      .then((d) => {
+        setForm({
+          nickname:    d.user.nickname ?? '',
+          allergies:   d.user.allergies ?? '',
+          preferences: processTags(d.user.preferences?.likes),
+          dislikes:    processTags(d.user.preferences?.dislikes),
+        })
+      })
+      .catch(() => {})
+      .finally(() => setDataLoading(false))
+  }, [])
 
-        const res = await axios.get('/auth/me', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        
-        const u = res.data;
-        setNickname(u.nickname || '');
-        setAllergies(u.allergies || '');
-        // 💡 백엔드에서 받은 preferences JSON 내 likes, dislikes 배열을 가져옴
-        setLikes(u.preferences?.likes || []);
-        setDislikes(u.preferences?.dislikes || []);
-      } catch (err) {
-        console.error(err);
-        alert('유저 데이터를 불러올 수 없습니다.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadUserData();
-  }, []);
+  // ── 버튼 토글 (기존 기능) ───────────────────────────────────────────────────
+  const togglePref = (food) =>
+    setForm((f) => ({
+      ...f,
+      preferences: f.preferences.includes(food)
+        ? f.preferences.filter((x) => x !== food)
+        : [...f.preferences, food],
+    }))
 
-  // 2. 좋아하는 음식 추가 및 삭제 핸들러
+  const toggleDislike = (food) =>
+    setForm((f) => ({
+      ...f,
+      dislikes: f.dislikes.includes(food)
+        ? f.dislikes.filter((x) => x !== food)
+        : [...f.dislikes, food],
+    }))
+
+  // ── 팀원 코드: 직접 입력 추가 ──────────────────────────────────────────────
   const handleAddLike = () => {
-    const value = inputLike.trim();
-    if (value && !likes.includes(value)) {
-      setLikes([...likes, value]);
-      setInputLike('');
+    const val = inputLike.trim()
+    if (val && !form.preferences.includes(val)) {
+      setForm((f) => ({ ...f, preferences: [...f.preferences, val] }))
+      setInputLike('')
     }
-  };
+  }
 
-  const handleRemoveLike = (target) => {
-    setLikes(likes.filter(item => item !== target));
-  };
+  const handleRemoveLike = (target) =>
+    setForm((f) => ({ ...f, preferences: f.preferences.filter((x) => x !== target) }))
 
-  // 3. 기피하는 음식 추가 및 삭제 핸들러
   const handleAddDislike = () => {
-    const value = inputDislike.trim();
-    if (value && !dislikes.includes(value)) {
-      setDislikes([...dislikes, value]);
-      setInputDislike('');
+    const val = inputDislike.trim()
+    if (val && !form.dislikes.includes(val)) {
+      setForm((f) => ({ ...f, dislikes: [...f.dislikes, val] }))
+      setInputDislike('')
     }
-  };
+  }
 
-  const handleRemoveDislike = (target) => {
-    setDislikes(dislikes.filter(item => item !== target));
-  };
+  const handleRemoveDislike = (target) =>
+    setForm((f) => ({ ...f, dislikes: f.dislikes.filter((x) => x !== target) }))
 
-  // 4. 💡 [핵심] 서버로 수정된 데이터 저장 전송 (PUT /auth/me)
+  // ── 저장 ────────────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!nickname.trim()) {
-      alert('닉네임은 공백일 수 없습니다.');
-      return;
-    }
-
+    e.preventDefault()
+    if (!form.nickname.trim()) { setError('닉네임은 공백일 수 없습니다.'); return }
+    setError(''); setLoading(true)
     try {
-      const token = localStorage.getItem('access_token');
-      
-      // 💡 백엔드 routes.py의 update_me 명세와 100% 일치하는 payload 포맷팅
+      // 팀원 코드와 기존 코드 payload 형식 통일
       const payload = {
-        nickname: nickname.strip ? nickname.strip() : nickname.trim(),
-        allergies: allergies,
-        likes: likes,       // 백엔드의 data.get('likes') 수신부와 일치
-        dislikes: dislikes, // 백엔드의 data.get('dislikes') 수신부와 일치
-      };
-
-      const response = await axios.put('/auth/me', payload, {
-        headers: { 
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      alert('정보가 성공적으로 수정되었습니다!');
-      if (onSaveSuccess) onSaveSuccess(response.data);
+        nickname:    form.nickname.trim(),
+        allergies:   form.allergies,
+        preferences: form.preferences,  // routes.py: data.get('preferences')
+        dislikes:    form.dislikes,      // routes.py: data.get('dislikes')
+      }
+      const updated = await updateMyPageProfile(payload)
+      ctxLogin(updated)
+      navigate('/mypage')
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || '수정 중 오류가 발생했습니다.');
-    }
-  };
+      setError(err.response?.data?.message ?? '저장에 실패했습니다.')
+    } finally { setLoading(false) }
+  }
 
-  if (loading) return <div style={styles.center}>로딩 중...</div>;
+  if (dataLoading) return (
+    <div style={{ textAlign: 'center', padding: 60, color: 'var(--text-muted)' }}>로딩 중...</div>
+  )
 
   return (
-    <div style={styles.container}>
-      <form onSubmit={handleSubmit} style={styles.form}>
-        <h3 style={styles.formTitle}>📝 내 정보 수정</h3>
-        
-        {/* 닉네임 입력 */}
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>닉네임</label>
-          <input 
-            type="text" 
-            value={nickname} 
-            onChange={(e) => setNickname(e.target.value)} 
-            style={styles.input}
-          />
-        </div>
+    <>
+      <Link to="/mypage" className="btn btn-sm btn-secondary" style={{ marginBottom: 16 }}>
+        ← 마이페이지
+      </Link>
 
-        {/* 알러지 입력 */}
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>알러지 / 제외 재료</label>
-          <input 
-            type="text" 
-            value={allergies} 
-            onChange={(e) => setAllergies(e.target.value)} 
-            placeholder="예: 견과류, 오이"
-            style={styles.input}
-          />
-        </div>
+      <h2 style={{ marginBottom: 24 }}>✏️ 프로필 수정</h2>
 
-        {/* 좋아하는 음식 관리 */}
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>👍 좋아하는 음식 추가</label>
-          <div style={styles.row}>
-            <input 
-              type="text" 
-              value={inputLike} 
-              onChange={(e) => setInputLike(e.target.value)} 
-              placeholder="예: 삼겹살" 
-              style={styles.inlineInput}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddLike())}
-            />
-            <button type="button" onClick={handleAddLike} style={styles.addButton}>추가</button>
+      <div style={{ background: 'var(--bg-white)', border: '1px solid var(--border-color)', borderRadius: 'var(--border-radius-xl)', padding: 32, maxWidth: 600 }}>
+        <form onSubmit={handleSubmit}>
+
+          {/* 닉네임 */}
+          <div className="form-group">
+            <label className="form-label">닉네임</label>
+            <input type="text" className="form-control" required
+              value={form.nickname}
+              onChange={(e) => setForm({ ...form, nickname: e.target.value })} />
           </div>
-          <div style={styles.tagContainer}>
-            {likes.map((item, idx) => (
-              <span key={idx} style={styles.likeTag}>
-                {item}
-                <button type="button" onClick={() => handleRemoveLike(item)} style={styles.tagDelBtn}>×</button>
-              </span>
-            ))}
+
+          {/* 알러지 */}
+          <div className="form-group">
+            <label className="form-label">
+              알러지 / 제외 재료
+              <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> (쉼표로 구분)</span>
+            </label>
+            <input type="text" className="form-control"
+              placeholder="예: 견과류, 오이"
+              value={form.allergies}
+              onChange={(e) => setForm({ ...form, allergies: e.target.value })} />
           </div>
-        </div>
 
-        {/* 기피하는 음식 관리 */}
-        <div style={styles.inputGroup}>
-          <label style={styles.label}>👎 기피하는 음식 추가</label>
-          <div style={styles.row}>
-            <input 
-              type="text" 
-              value={inputDislike} 
-              onChange={(e) => setInputDislike(e.target.value)} 
-              placeholder="예: 민트초코" 
-              style={styles.inlineInput}
-              onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddDislike())}
-            />
-            <button type="button" onClick={handleAddDislike} style={styles.addButton}>추가</button>
+          {/* ── 좋아하는 음식 ── */}
+          <div className="form-group">
+            <label className="form-label">👍 좋아하는 음식</label>
+
+            {/* 버튼 선택 */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+              {PREF_FOODS.map((food) => (
+                <button type="button" key={food}
+                  onClick={() => togglePref(food)}
+                  style={{
+                    padding: '5px 14px', borderRadius: 20, border: '1.5px solid',
+                    cursor: 'pointer', fontSize: '.82rem', fontWeight: 600,
+                    borderColor: form.preferences.includes(food) ? '#1890ff' : 'var(--border-color)',
+                    background: form.preferences.includes(food) ? '#e6f7ff' : 'var(--bg-white)',
+                    color: form.preferences.includes(food) ? '#1890ff' : 'var(--text-secondary)',
+                  }}>
+                  {food}
+                </button>
+              ))}
+            </div>
+
+            {/* 직접 입력 (팀원 코드) */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <input type="text" className="form-control"
+                placeholder="직접 입력 후 Enter"
+                value={inputLike}
+                onChange={(e) => setInputLike(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddLike())}
+                style={{ flex: 1 }} />
+              <button type="button" className="btn btn-secondary btn-sm" onClick={handleAddLike} style={{ flexShrink: 0 }}>추가</button>
+            </div>
+
+            {/* 선택된 태그 */}
+            {form.preferences.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {form.preferences.map((item, idx) => (
+                  <span key={idx} style={{ background: '#e6f7ff', color: '#1890ff', border: '1px solid #91d5ff', padding: '4px 10px', borderRadius: 20, fontSize: '.78rem', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {item}
+                    <button type="button" onClick={() => handleRemoveLike(item)}
+                      style={{ border: 'none', background: 'none', color: '#1890ff', cursor: 'pointer', fontSize: '.85rem', padding: 0, fontWeight: 700 }}>×</button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-          <div style={styles.tagContainer}>
-            {dislikes.map((item, idx) => (
-              <span key={idx} style={styles.dislikeTag}>
-                {item}
-                <button type="button" onClick={() => handleRemoveDislike(item)} style={styles.tagDelBtn}>×</button>
-              </span>
-            ))}
+
+          {/* ── 기피하는 음식 ── */}
+          <div className="form-group">
+            <label className="form-label">👎 기피하는 음식</label>
+
+            {/* 버튼 선택 */}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
+              {DISLIKE_FOODS.map((food) => (
+                <button type="button" key={food}
+                  onClick={() => toggleDislike(food)}
+                  style={{
+                    padding: '5px 14px', borderRadius: 20, border: '1.5px solid',
+                    cursor: 'pointer', fontSize: '.82rem', fontWeight: 600,
+                    borderColor: form.dislikes.includes(food) ? '#ff4d4f' : 'var(--border-color)',
+                    background: form.dislikes.includes(food) ? '#fff1f0' : 'var(--bg-white)',
+                    color: form.dislikes.includes(food) ? '#ff4d4f' : 'var(--text-secondary)',
+                  }}>
+                  {food}
+                </button>
+              ))}
+            </div>
+
+            {/* 직접 입력 (팀원 코드) */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              <input type="text" className="form-control"
+                placeholder="직접 입력 후 Enter"
+                value={inputDislike}
+                onChange={(e) => setInputDislike(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddDislike())}
+                style={{ flex: 1 }} />
+              <button type="button" className="btn btn-secondary btn-sm" onClick={handleAddDislike} style={{ flexShrink: 0 }}>추가</button>
+            </div>
+
+            {/* 선택된 태그 */}
+            {form.dislikes.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {form.dislikes.map((item, idx) => (
+                  <span key={idx} style={{ background: '#fff1f0', color: '#ff4d4f', border: '1px solid #ffa39e', padding: '4px 10px', borderRadius: 20, fontSize: '.78rem', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    {item}
+                    <button type="button" onClick={() => handleRemoveDislike(item)}
+                      style={{ border: 'none', background: 'none', color: '#ff4d4f', cursor: 'pointer', fontSize: '.85rem', padding: 0, fontWeight: 700 }}>×</button>
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
 
-        <button type="submit" style={styles.submitButton}>저장 완료</button>
-      </form>
-    </div>
-  );
-};
+          {error && <div className="alert alert-danger">{error}</div>}
 
-// ── 내부 인라인 스타일 정의 ───────────────────────────────────────────
-const styles = {
-  container: { padding: '20px', maxWidth: '600px', margin: '0 auto', fontFamily: 'sans-serif' },
-  center: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '30vh', fontSize: '16px' },
-  form: { backgroundColor: '#fff', padding: '25px', borderRadius: '12px', boxShadow: '0 4px 10px rgba(0,0,0,0.08)' },
-  formTitle: { margin: '0 0 20px 0', color: '#333', borderBottom: '2px solid #f0f0f0', paddingBottom: '10px' },
-  inputGroup: { marginBottom: '20px' },
-  label: { display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#555', fontSize: '14px' },
-  input: { width: '100%', padding: '10px', borderRadius: '6px', border: '1px solid #ccc', boxSizing: 'border-box', fontSize: '14px' },
-  row: { display: 'flex', gap: '10px' },
-  inlineInput: { flex: 1, padding: '10px', borderRadius: '6px', border: '1px solid #ccc', fontSize: '14px' },
-  addButton: { padding: '10px 16px', backgroundColor: '#555', color: '#fff', border: 'none', borderRadius: '6px', cursor: 'pointer' },
-  tagContainer: { display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '10px' },
-  likeTag: { backgroundColor: '#e6f7ff', color: '#1890ff', border: '1px solid #91d5ff', padding: '4px 8px', borderRadius: '4px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' },
-  dislikeTag: { backgroundColor: '#fff1f0', color: '#ff4d4f', border: '1px solid #ffa39e', padding: '4px 8px', borderRadius: '4px', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '6px' },
-  tagDelBtn: { border: 'none', background: 'transparent', color: 'inherit', cursor: 'pointer', fontSize: '14px', padding: 0, fontWeight: 'bold' },
-  submitButton: { width: '100%', padding: '12px', backgroundColor: '#1890ff', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer', marginTop: '10px' }
-};
-
-export default MyPageEdit;
+          <button type="submit" disabled={loading} className="btn btn-primary btn-lg btn-block">
+            {loading ? '저장 중...' : '저장하기'}
+          </button>
+        </form>
+      </div>
+    </>
+  )
+}
