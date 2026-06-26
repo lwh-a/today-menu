@@ -6,6 +6,7 @@ import { useAuth } from '../App'
 import KakaoMap from '../components/KakaoMap'
 import RestaurantSearch from '../components/RestaurantSearch'
 
+
 const CAT_ICON = { 한식: '🍚', 일식: '🍣', 중식: '🥟', 양식: '🥩', 분식: '🍜', 치킨: '🍗', 피자: '🍕', 카페: '☕' }
 const TREND_FOODS = ['삼겹살', '치킨', '짜장면', '순대국', '초밥', '파스타', '비빔밥', '떡볶이']
 const POPULAR = [['🍚', '김치찌개'], ['🍜', '짬뽕'], ['🥩', '스테이크'], ['🍣', '초밥'], ['🍗', '치킨'], ['🍕', '피자']]
@@ -53,21 +54,21 @@ export default function Home() {
       <div className="flex-between mb-16">
         <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
           <h2 style={{
-            fontSize: '2.2rem',            /* 글자 크기를 이미지처럼 시원하게 키움 */
-            fontWeight: 900,               /* 가장 두꺼운 폰트 두께 */
-            color: '#111111',              /* 이미지 특유의 진한 블랙 컬러 */
-            letterSpacing: '-0.05em',      /* 이미지처럼 글자 자간을 쫀쫀하게 압축 */
+            fontSize: '1.8rem',            /* 👈 기존 2.2rem에서 1.8rem으로 축소해 한 줄 배치 보장 */
+            fontWeight: 900,
+            color: '#111111',
+            letterSpacing: '-0.05em',
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.15em',                 /* 단어 사이의 미세한 간격 */
-            fontFamily: '"Arial Black", "Impact", "Noto Sans KR", sans-serif' /* 굵은 영문 전용 폰트 지정 */
+            gap: '0.15em',
+            fontFamily: '"Arial Black", "Impact", "Noto Sans KR", sans-serif'
           }}>
             HAVE A G
             <span style={{
               display: 'inline-flex',
               alignItems: 'center',
-              fontSize: '1.05em',          /* 시계 이모지가 글자 높이와 딱 맞게 미세 조절 */
-              margin: '0 -0.07em',         /* 이모지 좌우 공백을 줄여 자연스럽게 연결 */
+              fontSize: '1.05em',
+              margin: '0 -0.07em',
               verticalAlign: 'middle'
             }}>
               🕒
