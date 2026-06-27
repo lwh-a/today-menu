@@ -3,22 +3,16 @@ import { useState, useEffect, createContext, useContext } from 'react'
 import { fetchMe } from './api/services'
 import { TokenStore } from './api/axiosInstance'
 
-import Header        from './components/Header'
-import ChatBot       from './components/ChatBot'
-import Footer        from './components/Footer'
-import Home          from './pages/Home'
-import Login         from './pages/Login'
-import Register      from './pages/Register'
-import Menu          from './pages/Menu'
-import MenuDetail    from './pages/MenuDetail'
-import Party         from './pages/Party'
-import PartyDetail   from './pages/PartyDetail'
-import PartyCreate   from './pages/PartyCreate'
-import MyPage        from './pages/MyPage'
-import MyPageEdit    from './pages/MyPageEdit'
-import Game          from './pages/Game'
-import NaverCallback from './pages/NaverCallback'
+import Header    from './components/Header'
+import ChatBot   from './components/ChatBot'
+import Home      from './pages/Home'
+import Login     from './pages/Login'
+import Register  from './pages/Register'
+import Menu      from './pages/Menu'
+import Party     from './pages/Party'
+import MyPage    from './pages/MyPage'
 
+// ── Auth Context ──────────────────────────────────────────────────────────────
 export const AuthContext = createContext(null)
 export const useAuth = () => useContext(AuthContext)
 
@@ -27,27 +21,21 @@ function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    if (!TokenStore.getAccess()) { setLoading(false); return }
-    fetchMe()
-      .then(setUser)
-      .catch(() => { TokenStore.clear(); setUser(null) })
-      .finally(() => setLoading(false))
+    if (TokenStore.getAccess()) {
+      fetchMe()
+        .then(setUser)
+        .catch(() => { TokenStore.clear(); setUser(null) })
+        .finally(() => setLoading(false))
+    } else {
+      setLoading(false)
+    }
   }, [])
 
+  const login  = (userData) => setUser(userData)
+  const logout = () => { TokenStore.clear(); setUser(null) }
+
   return (
-    <AuthContext.Provider value={{
-      user, loading,
-      login:  (data) => {
-        // data = 로그인 응답 { access_token, refresh_token, user_id, nickname, ... }
-        //      또는 프로필 수정 응답 { user_id, nickname, ... } (토큰 없음)
-        if (!data) return
-        const { access_token, refresh_token, ...userInfo } = data
-        // 토큰이 있으면 저장, 없으면 기존 토큰 유지
-        if (access_token) TokenStore.setTokens(access_token, refresh_token)
-        setUser(userInfo)
-      },
-      logout: ()  => { TokenStore.clear(); setUser(null) },
-    }}>
+    <AuthContext.Provider value={{ user, loading, login, logout }}>
       {children}
     </AuthContext.Provider>
   )
@@ -55,46 +43,27 @@ function AuthProvider({ children }) {
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
-  if (loading) return (
-    <div className="flex-center" style={{ minHeight: '60vh', color: 'var(--text-muted)' }}>
-      로딩 중...
-    </div>
-  )
+  if (loading) return <div className="flex justify-center items-center h-screen text-gray-400">로딩 중...</div>
   return user ? children : <Navigate to="/login" replace />
 }
 
+// ── App ───────────────────────────────────────────────────────────────────────
 export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        {/*
-          #naverIdLogin — 네이버 SDK가 이 div 안에 버튼을 렌더링함
-          display:none 으로 숨겨두고 우리는 직접 버튼을 만들어 사용
-        */}
-        <div id="naverIdLogin" style={{ display: 'none' }} />
-
-        <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+        <div className="min-h-screen flex flex-col">
           <Header />
-          <main className="page-wrap" style={{ flex: 1 }}>
-            <div className="container">
-              <Routes>
-                <Route path="/"                        element={<Home />} />
-                <Route path="/login"                   element={<Login />} />
-                <Route path="/register"                element={<Register />} />
-                <Route path="/menu"                    element={<Menu />} />
-                <Route path="/menu/:restId"            element={<MenuDetail />} />
-                <Route path="/party"                   element={<Party />} />
-                <Route path="/party/create"            element={<PrivateRoute><PartyCreate /></PrivateRoute>} />
-                <Route path="/party/:partyId"          element={<PartyDetail />} />
-                <Route path="/mypage"                  element={<PrivateRoute><MyPage /></PrivateRoute>} />
-                <Route path="/mypage/edit"             element={<PrivateRoute><MyPageEdit /></PrivateRoute>} />
-                <Route path="/game"                    element={<Game />} />
-                <Route path="/auth/naver/callback"     element={<NaverCallback />} />
-                <Route path="*"                        element={<Navigate to="/" replace />} />
-              </Routes>
-            </div>
+          <main className="flex-1">
+            <Routes>
+              <Route path="/"         element={<Home />} />
+              <Route path="/login"    element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/menu"     element={<Menu />} />
+              <Route path="/party"    element={<Party />} />
+              <Route path="/mypage"   element={<PrivateRoute><MyPage /></PrivateRoute>} />
+            </Routes>
           </main>
-          <Footer />
           <ChatBot />
         </div>
       </BrowserRouter>
