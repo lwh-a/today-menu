@@ -86,7 +86,7 @@ export default function MenuDetail() {
             <h3 style={{ marginBottom: 16 }}>예약 / 파티 참여</h3>
             {user ? (
               <>
-                <Link to="/party/create" className="btn btn-primary btn-block">
+                <Link to={`/party/create?rest=${rest.id}`} className="btn btn-primary btn-block">
                   👥 밥친구 파티 만들기
                 </Link>
                 <hr className="divider" />
