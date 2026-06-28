@@ -21,6 +21,8 @@ class User(db.Model):
     manner_score = db.Column(db.Float, default=36.5)
     preferences  = db.Column(db.JSON)       # { likes: [], dislikes: [] }
     allergies    = db.Column(db.Text)
+    address      = db.Column(db.String(200), nullable=True)
+    gender       = db.Column(db.String(20), nullable=True, default='미설정')
     role         = db.Column(db.Enum(RoleEnum), default=RoleEnum.USER)
     created_at   = db.Column(db.DateTime, default=datetime.utcnow)
 
@@ -32,16 +34,17 @@ class Restaurant(db.Model):
     __tablename__ = 'restaurants'
 
     restaurant_id = db.Column(db.Integer, primary_key=True)
-    name          = db.Column(db.String(100), nullable=False)
-    address       = db.Column(db.String(200), nullable=False)
-    latitude      = db.Column(db.Numeric(10, 8))
-    longitude     = db.Column(db.Numeric(11, 8))
-    category      = db.Column(db.String(50))
-    description   = db.Column(db.Text)
-    avg_rating    = db.Column(db.Float, default=0.0)
-
+    name = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(200), nullable=False)
+    phone = db.Column(db.String(20), nullable=True)
+    latitude = db.Column(db.Numeric(10, 8))
+    longitude = db.Column(db.Numeric(11, 8))
+    category = db.Column(db.String(50))
+    description = db.Column(db.Text)
+    avg_rating = db.Column(db.Float, default=0.0)
     parties  = db.relationship('Party',              backref='restaurant', lazy=True)
     rec_logs = db.relationship('RecommendationLog',  backref='restaurant', lazy=True)
+
 
 class Party(db.Model):
     __tablename__ = 'parties'
@@ -77,6 +80,20 @@ class ChatMessage(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     sender = db.relationship('User', foreign_keys=[sender_id])
+
+class MannerVote(db.Model):
+    """매너온도 투표 — 하루 2회 제한"""
+    __tablename__ = 'manner_votes'
+
+    vote_id     = db.Column(db.Integer, primary_key=True)
+    voter_id    = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    target_id   = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    is_positive = db.Column(db.Boolean, nullable=False)
+    voted_at    = db.Column(db.DateTime, default=datetime.utcnow)
+
+    voter  = db.relationship('User', foreign_keys=[voter_id])
+    target = db.relationship('User', foreign_keys=[target_id])
+
 
 class RecommendationLog(db.Model):
     __tablename__ = 'recommendation_logs'
