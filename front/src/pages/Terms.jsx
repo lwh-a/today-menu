@@ -6,12 +6,12 @@ import { privacyContent } from "../data/privacyContent";
 export default function Terms() {
   const location = useLocation();
 
+  // Footer 진입 여부
   const fromFooter = !!location.state?.defaultTab;
   const initialTab = location.state?.defaultTab || "terms";
 
   const [tab, setTab] = useState(initialTab);
 
-  // ✅ JSX 깨짐 수정
   useEffect(() => {
     if (location.state?.defaultTab) {
       setTab(location.state.defaultTab);
@@ -35,7 +35,7 @@ export default function Terms() {
   return (
     <div className="flex justify-center flex-wrap w-full min-h-screen bg-white font-sans antialiased text-gray-900 pb-40">
 
-      {/* 타이틀 */}
+      {/* ✅ 타이틀 */}
       <div className="w-full py-20 text-center">
         <h1 className="text-4xl font-black tracking-tight text-black">
           {fromFooter ? pageTitle : "약관 안내"}
@@ -45,10 +45,11 @@ export default function Terms() {
       {/* ✅ 탭 (Footer 진입 시 숨김) */}
       {!fromFooter && (
         <div className="w-full border-b border-gray-200 sticky top-0 bg-white z-10">
-          <div className="w-full flex justify-center gap-20 py-6">
+          <div className="flex justify-center gap-20 py-6">
+
             <button
               onClick={() => setTab("terms")}
-              className={`text-lg font-bold transition-all relative pb-2 ${
+              className={`text-lg font-bold relative pb-2 ${
                 tab === "terms"
                   ? "text-black"
                   : "text-gray-400 opacity-50 hover:opacity-80"
@@ -62,7 +63,7 @@ export default function Terms() {
 
             <button
               onClick={() => setTab("privacy")}
-              className={`text-lg font-bold transition-all relative pb-2 ${
+              className={`text-lg font-bold relative pb-2 ${
                 tab === "privacy"
                   ? "text-black"
                   : "text-gray-400 opacity-50 hover:opacity-80"
@@ -73,23 +74,24 @@ export default function Terms() {
                 <div className="absolute bottom-0 inset-x-0 h-[2px] bg-black" />
               )}
             </button>
+
           </div>
         </div>
       )}
 
-      {/* 본문 */}
+      {/* ✅ 본문 */}
       <main className="max-w-4xl mx-auto px-8 mt-32 text-center">
 
-        <div className="mb-20">
+        <div className="mb-24">
           <h2 className="text-2xl font-black text-black">
             {subTitle}
           </h2>
         </div>
 
-        <div className="space-y-16">
+        <div className="space-y-20">
           {data.map((item, index) => (
             <section key={index}>
-              <h3 className="text-xl font-extrabold text-black mb-4">
+              <h3 className="text-xl font-extrabold text-black mb-5">
                 {item.title}
               </h3>
 
