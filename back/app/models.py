@@ -2,6 +2,10 @@ from . import db
 from datetime import datetime
 import enum
 
+party_kicked_users = db.Table('party_kicked_users',
+    db.Column('party_id', db.Integer, db.ForeignKey('parties.party_id'), primary_key=True),
+    db.Column('user_id', db.Integer, db.ForeignKey('users.user_id'), primary_key=True)
+)
 
 class RoleEnum(enum.Enum):
     USER  = "USER"
@@ -14,34 +18,42 @@ class StatusEnum(enum.Enum):
 
 class User(db.Model):
     __tablename__ = 'users'
-    user_id     = db.Column(db.Integer, primary_key=True)
-    email       = db.Column(db.String(100), unique=True, nullable=False)
-    password    = db.Column(db.String(200), nullable=False)
-    nickname    = db.Column(db.String(50), unique=True, nullable=False)
-    manner_score= db.Column(db.Float, default=36.5)
-    preferences = db.Column(db.JSON)
-    allergies   = db.Column(db.Text)
-    role        = db.Column(db.Enum(RoleEnum), default=RoleEnum.USER)
-    created_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    user_id      = db.Column(db.Integer, primary_key=True)
+    email        = db.Column(db.String(100), unique=True, nullable=False)
+    password     = db.Column(db.String(200), nullable=False)
+    nickname     = db.Column(db.String(50),  unique=True, nullable=False)
+    manner_score = db.Column(db.Float, default=36.5)
+    preferences  = db.Column(db.JSON)       # { likes: [], dislikes: [] }
+    allergies    = db.Column(db.Text)
+    address      = db.Column(db.String(200), nullable=True)
+    gender       = db.Column(db.String(20), nullable=True, default='미설정')
+    role         = db.Column(db.Enum(RoleEnum), default=RoleEnum.USER)
+    created_at   = db.Column(db.DateTime, default=datetime.utcnow)
+
     parties_hosted = db.relationship('Party',      backref='host', lazy=True)
     party_members  = db.relationship('PartyMember', backref='user', lazy=True)
     rec_logs       = db.relationship('RecommendationLog', backref='user', lazy=True)
 
 class Restaurant(db.Model):
     __tablename__ = 'restaurants'
+
     restaurant_id = db.Column(db.Integer, primary_key=True)
-    name          = db.Column(db.String(100), nullable=False)
-    address       = db.Column(db.String(200), nullable=False)
-    latitude      = db.Column(db.Numeric(10, 8))
-    longitude     = db.Column(db.Numeric(11, 8))
-    category      = db.Column(db.String(50))
-    description   = db.Column(db.Text)
-    avg_rating    = db.Column(db.Float, default=0.0)
+    name = db.Column(db.String(100), nullable=False)
+    address = db.Column(db.String(200), nullable=False)
+    phone = db.Column(db.String(20), nullable=True)
+    latitude = db.Column(db.Numeric(10, 8))
+    longitude = db.Column(db.Numeric(11, 8))
+    category = db.Column(db.String(50))
+    description = db.Column(db.Text)
+    avg_rating = db.Column(db.Float, default=0.0)
     parties  = db.relationship('Party',              backref='restaurant', lazy=True)
     rec_logs = db.relationship('RecommendationLog',  backref='restaurant', lazy=True)
 
+
 class Party(db.Model):
     __tablename__ = 'parties'
+
     party_id      = db.Column(db.Integer, primary_key=True)
     restaurant_id = db.Column(db.Integer, db.ForeignKey('restaurants.restaurant_id'), nullable=False)
     host_id       = db.Column(db.Integer, db.ForeignKey('users.user_id'),             nullable=False)
@@ -50,27 +62,52 @@ class Party(db.Model):
     max_people    = db.Column(db.Integer,     nullable=False)
     status        = db.Column(db.Enum(StatusEnum), default=StatusEnum.RECRUITING)
     created_at    = db.Column(db.DateTime, default=datetime.utcnow)
+
     members  = db.relationship('PartyMember',   backref='party', cascade='all, delete-orphan')
     messages = db.relationship('ChatMessage',   backref='party', cascade='all, delete-orphan')
+    kicked_users = db.relationship('User', secondary=party_kicked_users, backref='kicked_from_parties')
 
+    def refresh_status(self):
+        now = datetime.utcnow()
+        if self.status != StatusEnum.COMPLETED and self.meeting_time < now:
+            self.status = StatusEnum.COMPLETED
+        elif self.status == StatusEnum.RECRUITING and len(self.members) >= self.max_people:
+            self.status = StatusEnum.CLOSED
+        db.session.commit()
 
 class PartyMember(db.Model):
     __tablename__ = 'party_members'
-    member_id  = db.Column(db.Integer, primary_key=True)
-    party_id   = db.Column(db.Integer, db.ForeignKey('parties.party_id'), nullable=False)
-    user_id    = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
-    is_host    = db.Column(db.Boolean, default=False)
-    joined_at  = db.Column(db.DateTime, default=datetime.utcnow)
+
+    member_id = db.Column(db.Integer, primary_key=True)
+    party_id  = db.Column(db.Integer, db.ForeignKey('parties.party_id'), nullable=False)
+    user_id   = db.Column(db.Integer, db.ForeignKey('users.user_id'),    nullable=False)
+    is_host   = db.Column(db.Boolean, default=False)
+    joined_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 class ChatMessage(db.Model):
     __tablename__ = 'chat_messages'
 
     message_id = db.Column(db.Integer, primary_key=True)
-    party_id   = db.Column(db.Integer, db.ForeignKey('parties.party_id'), nullable=False)
+    party_id = db.Column(db.Integer, db.ForeignKey('parties.party_id'), nullable=False, index=True)
     sender_id  = db.Column(db.Integer, db.ForeignKey('users.user_id'),    nullable=False)
     content    = db.Column(db.Text, nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, index=True)
+
     sender = db.relationship('User', foreign_keys=[sender_id])
+
+class MannerVote(db.Model):
+    """매너온도 투표 — 하루 2회 제한"""
+    __tablename__ = 'manner_votes'
+
+    vote_id     = db.Column(db.Integer, primary_key=True)
+    voter_id    = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    target_id   = db.Column(db.Integer, db.ForeignKey('users.user_id'), nullable=False)
+    is_positive = db.Column(db.Boolean, nullable=False)
+    voted_at    = db.Column(db.DateTime, default=datetime.utcnow)
+
+    voter  = db.relationship('User', foreign_keys=[voter_id])
+    target = db.relationship('User', foreign_keys=[target_id])
+
 
 class RecommendationLog(db.Model):
     __tablename__ = 'recommendation_logs'
