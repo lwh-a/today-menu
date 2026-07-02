@@ -1,11 +1,10 @@
-﻿// src/pages/Home.jsx
-import { useState, useEffect, useRef } from 'react'
+﻿import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { getRestaurants, getNearby, toggleLike } from '../api/services'
+import { getRestaurants, getNearby } from '../api/services'
 import { useAuth } from '../App'
-import Cafeteria from '../components/Cafeteria'
 import KakaoMap from '../components/KakaoMap'
 import RestaurantSearch from '../components/RestaurantSearch'
+import Cafeteria from '../components/Cafeteria'
 
 const adBannerClass =
   'w-full overflow-hidden rounded-[12px] bg-white max-md:h-[70px]'
@@ -13,26 +12,8 @@ const adBannerLinkClass = 'block h-full w-full'
 const adBannerImageClass =
   'h-full w-full object-contain object-center'
 
-const CAT_ICON = {
-  한식: '🍚',
-  일식: '🍣',
-  중식: '🥟',
-  양식: '🥩',
-  분식: '🍜',
-  치킨: '🍗',
-  피자: '🍕',
-  카페: '☕',
-}
-const TREND_FOODS = [
-  '라면',
-  '치킨',
-  '짜장면',
-  '떡볶이',
-  '초밥',
-  '파스타',
-  '비빔밥',
-  '샐러드',
-]
+const CAT_ICON = { 한식: '🍚', 일식: '🍣', 중식: '🥡', 양식: '🥩', 분식: '🍜', 치킨: '🍗', 피자: '🍕', 카페: '☕' }
+const TREND_FOODS = ['삼겹살', '치킨', '짜장면', '순대국', '초밥', '파스타', '비빔밥', '떡볶이']
 
 const SAMPLE_RESTAURANTS = [
   {
@@ -67,7 +48,7 @@ const SAMPLE_RESTAURANTS = [
   },
   {
     id: 'sample-4',
-    name: '카페 모닝쉘',
+    name: '카페 모먼트',
     category: '카페',
     address: '서울 성동구 성수동',
     avg_rating: 4.7,
@@ -94,6 +75,9 @@ const bannerActionsClass = 'flex flex-wrap gap-[5px]'
 const heroButtonLightClass = 'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[12px] bg-white px-6 text-[0.94rem] font-black text-[var(--color-primary)] shadow-[var(--shadow-sm)] transition-transform hover:-translate-y-0.5'
 const heroButtonYellowClass = 'inline-flex min-h-[44px] items-center justify-center gap-2 rounded-[12px] bg-[linear-gradient(135deg,var(--color-secondary),var(--color-accent))] px-6 text-[0.94rem] font-black text-[#4B2D07] shadow-[0_10px_18px_rgba(254,185,92,0.25)] transition-transform hover:-translate-y-0.5'
 
+const cafeteriaGridClass =
+  'grid grid-cols-4 gap-[15px] max-lg:grid-cols-2 max-[540px]:grid-cols-2'
+
 const bannerFoodClass = 'absolute right-0 top-0 bottom-0 z-[1] h-full w-[52%] rounded-l-[999px] rounded-r-none object-cover object-center shadow-[0_18px_30px_rgba(85,34,26,0.2)] max-md:hidden xl:w-[51%]'
 
 const bannerDoodleClass = 'absolute right-8 top-10 z-[2] text-4xl font-black text-white/95 max-md:hidden'
@@ -111,27 +95,24 @@ const categoryGridClass = 'mb-11 grid grid-cols-8 gap-3 max-lg:grid-cols-4 max-s
 const categoryItemClass = 'flex min-h-[90px] flex-col items-center justify-center gap-1.5 rounded-[10px] border border-[var(--border-color)] bg-white shadow-[0_8px_18px_rgba(42,29,26,0.07)] transition-all hover:-translate-y-1 hover:border-[var(--color-primary)] hover:shadow-[var(--shadow)]'
 const categoryIconClass = 'grid h-10 w-10 place-items-center text-[1.75rem]'
 const categoryLabelClass = 'text-[0.86rem] font-black text-[var(--text-primary)]'
-const recommendSectionClass =
-  'mb-[38px]'
-
-const recommendTitleWrapClass =
-  'mb-[18px] flex items-center justify-between font-black max-[540px]:items-end'
-
-const recommendTitleClass =
-  'relative text-[1.55rem] after:absolute after:left-0 after:bottom-[-8px] after:h-[3px] after:w-[34px] after:rounded-full after:bg-[var(--color-primary)] max-[540px]:text-[1.28rem]'
-
-const recommendMoreClass =
-  'text-[0.9rem] text-[#7D4213]'
-
-const cafeteriaGridClass =
-  'grid grid-cols-4 gap-[15px] max-lg:grid-cols-2 max-[540px]:grid-cols-2'
-
-const rankBadgeBaseClass =
-  'absolute left-0 top-0 grid h-[52px] w-[52px] place-items-center bg-[var(--color-primary)] text-[1.35rem] font-black text-white'
-
-const rankBadgeAccentClass =
-  'bg-[var(--color-accent)]'
-  
+const recommendSectionClass = 'mb-[38px]'
+const recommendTitleWrapClass = 'mb-[18px] flex items-center justify-between font-black max-[540px]:items-end'
+const recommendTitleClass = 'relative text-[1.55rem] after:absolute after:left-0 after:bottom-[-8px] after:h-[3px] after:w-[34px] after:rounded-full after:bg-[var(--color-primary)] max-[540px]:text-[1.28rem]'
+const recommendMoreClass = 'text-[0.9rem] text-[#7D4213]'
+const restaurantGridClass = 'grid grid-cols-4 gap-[15px] max-lg:grid-cols-2 max-[540px]:grid-cols-2'
+const restaurantCardClass = 'group overflow-hidden rounded-[8px] border border-[var(--border-color)] bg-white shadow-[var(--shadow-sm)] transition hover:-translate-y-1 hover:shadow-[var(--shadow)]'
+const restaurantImageWrapClass = 'relative h-[154px] overflow-hidden bg-[#FFF4EA] max-[540px]:h-[130px]'
+const restaurantImageClass = 'h-full w-full object-cover transition-transform duration-[280ms] group-hover:scale-105'
+const rankBadgeBaseClass = 'absolute left-0 top-0 grid h-[52px] w-[52px] place-items-center bg-[var(--color-primary)] text-[1.35rem] font-black text-white'
+const rankBadgeAccentClass = 'bg-[var(--color-accent)]'
+const restaurantBodyClass = 'px-[18px] pb-[18px] pt-4 max-[540px]:p-[14px]'
+const restaurantTitleClass = 'mb-1.5 text-[1.08rem] font-black text-[var(--text-primary)]'
+const restaurantMetaClass = 'mb-[5px] flex items-center gap-1 text-[0.88rem] text-[var(--text-secondary)]'
+const restaurantScoreClass = 'font-black text-[var(--color-primary)]'
+const restaurantReviewClass = 'text-[var(--text-secondary)]'
+const restaurantAddressClass = 'mb-[14px] overflow-hidden text-ellipsis whitespace-nowrap text-[0.88rem] text-[var(--text-secondary)]'
+const restaurantTagRowClass = 'flex flex-wrap gap-[7px]'
+const restaurantTagClass = 'rounded-[7px] bg-[#FFF0E4] px-2 py-[5px] text-[0.78rem] font-extrabold text-[var(--color-primary)] max-[540px]:text-[0.72rem]'
 const quickPanelsClass = 'mb-[18px] grid grid-cols-2 gap-[18px] max-md:grid-cols-1'
 const quickCardBaseClass = 'flex min-h-[230px] items-center justify-between gap-[18px] overflow-hidden rounded-[10px] px-[38px] py-8 max-md:px-[22px] max-md:py-7'
 const quickMapCardClass = '[background:radial-gradient(circle_at_82%_70%,rgba(255,255,255,0.68),transparent_30%),linear-gradient(135deg,#FFF4A8,#FFE67C)]'
@@ -155,7 +136,7 @@ export default function Home() {
     getRestaurants({ cat: '전체', page: 1 })
       .then((d) => setTrending(d.items?.length ? d.items : SAMPLE_RESTAURANTS))
       .catch((err) => {
-        console.error('trending load failed:', err)
+        console.error('trending 로드 실패:', err)
         setTrending(SAMPLE_RESTAURANTS)
       })
   }, [])
@@ -166,7 +147,7 @@ export default function Home() {
   }, [])
 
   const findNearby = () => {
-    if (!navigator.geolocation) return alert('위치 서비스를 사용할 수 없어요.')
+    if (!navigator.geolocation) return alert('위치 서비스 미지원')
     setLocStatus('loading')
     navigator.geolocation.getCurrentPosition(async ({ coords }) => {
       const loc = { lat: coords.latitude, lng: coords.longitude }
@@ -209,13 +190,14 @@ export default function Home() {
           <div className={`${slideBaseClass} ${slideBackgrounds[0]} ${bannerIdx === 0 ? slideActiveClass : ''}`}>
             <div className={bannerCopyClass}>
               <h1 className={bannerTitleClass}>
-                HAVE A G<span className={bannerTitleAccentClass}>하</span>OD TIME
+                HAVE A G<span className={bannerTitleAccentClass}>😍</span>OD TIME
               </h1>
               <p className={bannerTextClass}>
                 AI가 추천하는 오늘의 베스트 맛집
                 <br />
                 지금 당신의 취향을 찾아보세요
-              </p>
+              </p>              
+
               <div className={bannerActionsClass}>
                 <Link to="/menu" className={heroButtonLightClass}>추천 맛집 보기 →</Link>
                 <Link to="/game" className={heroButtonYellowClass}>랜덤 메뉴 추천 🎲</Link>
@@ -320,9 +302,8 @@ export default function Home() {
               />
 
               <span
-                className={`${rankBadgeBaseClass} ${
-                  index === 1 || index === 3 ? rankBadgeAccentClass : ''
-                }`}
+                className={`${rankBadgeBaseClass} ${index === 1 || index === 3 ? rankBadgeAccentClass : ''
+                  }`}
               >
                 {index + 1}
               </span>
