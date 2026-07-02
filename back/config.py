@@ -1,22 +1,19 @@
 import os
 from pathlib import Path
 
-# .env 파일 로드 (로컬용)
-try:
-    from dotenv import load_dotenv
-    load_dotenv()
-except:
-    pass
-
 basedir      = Path(__file__).resolve().parent
 instance_dir = basedir / 'instance'
 instance_dir.mkdir(exist_ok=True)
 
-# 환경변수 직접 확인 (디버깅용)
-_db_url = os.environ.get('DATABASE_URL', '')
-print(f"[CONFIG] DATABASE_URL = {_db_url[:30] if _db_url else 'NOT SET'}")
+# 모든 가능한 방법으로 DATABASE_URL 읽기
+_db_url = (
+    os.environ.get('DATABASE_URL') or
+    os.environ.get('SQLALCHEMY_DATABASE_URI') or
+    ''
+)
 
-# Render는 postgres:// → postgresql:// 변환 필요
+print(f"[CONFIG] DB URL: {_db_url[:40] if _db_url else 'NOT SET - using SQLite'}")
+
 if _db_url.startswith('postgres://'):
     _db_url = _db_url.replace('postgres://', 'postgresql://', 1)
 
