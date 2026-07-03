@@ -154,7 +154,7 @@ function Roulette({ menus }) {
       </div>
 
       {/* 룰렛 캔버스 */}
-      {fetching ? (
+      {loading ? (
         <div style={{ padding: 40, color: 'var(--text-muted)', textAlign: 'center' }}>
           <div style={{ fontSize: '2rem', marginBottom: 8 }}>🍽️</div>
           <div style={{ fontWeight: 700 }}>메뉴 불러오는 중...</div>
