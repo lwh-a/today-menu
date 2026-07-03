@@ -4,7 +4,9 @@ import { useAuth } from '../App'
 import { getRandomMenus } from '../api/services'
 
 // ── 카테고리 아이콘 ──────────────────────────────────────────────────────────
+
 const CAT_ICON = { 한식: '🍚', 일식: '🍣', 중식: '🥟', 양식: '🥩', 분식: '🍜', 치킨: '🍗', 카페: '☕', 술집: '🍺' }
+
 const catIcon = (c) => CAT_ICON[c] ?? '🍴'
 
 const CATEGORIES = ['전체', '한식', '일식', '중식', '양식', '분식', '치킨', '카페']
@@ -12,6 +14,7 @@ const CATEGORIES = ['전체', '한식', '일식', '중식', '양식', '분식', 
 // ══════════════════════════════════════════════════════════════════════════════
 // 게임 1 — 룰렛
 // ══════════════════════════════════════════════════════════════════════════════
+
 function Roulette({ menus }) {
   const canvasRef = useRef(null)
   const spinning = useRef(false)
@@ -20,11 +23,6 @@ function Roulette({ menus }) {
   const [isSpinning, setIsSpinning] = useState(false)
   const [category, setCategory] = useState('전체')
 
-  // 카테고리 필터 적용
-  const filtered = category === '전체'
-    ? menus
-    : menus.filter(m => m.category === category)
-  const items = filtered.slice(0, 30)
   const slice = (2 * Math.PI) / (items.length || 1)
   const COLORS = ['#E53E3E', '#DD6B20', 'var(--color-accent)', '#38A169', '#3182CE', '#6B46C1', '#D53F8C']
 
@@ -156,7 +154,12 @@ function Roulette({ menus }) {
       </div>
 
       {/* 룰렛 캔버스 */}
-      {items.length === 0 ? (
+      {fetching ? (
+        <div style={{ padding: 40, color: 'var(--text-muted)', textAlign: 'center' }}>
+          <div style={{ fontSize: '2rem', marginBottom: 8 }}>🍽️</div>
+          <div style={{ fontWeight: 700 }}>메뉴 불러오는 중...</div>
+        </div>
+      ) : items.length === 0 ? (
         <div style={{ padding: 40, color: 'var(--text-muted)', textAlign: 'center' }}>
           <div style={{ fontSize: '2rem', marginBottom: 8 }}>😅</div>
           <div style={{ fontWeight: 700 }}>{category} 메뉴가 없습니다</div>
