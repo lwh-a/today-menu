@@ -1624,9 +1624,9 @@ def answer_inquiry(id):
 @api_bp.route('/favorites', methods=['POST'])
 @jwt_login_required
 def toggle_favorite():
-    user_id = int(get_jwt_identity())
-    data = request.get_json(force=True)
-    restaurant_id = data.get('restaurant_id')
+    user_id       = int(get_jwt_identity())
+    data          = request.get_json(force=True)
+    restaurant_id = int(data.get('restaurant_id', 0))
 
     if not restaurant_id:
         return jsonify({"msg": "식당 ID가 필요합니다."}), 400
@@ -1650,7 +1650,7 @@ def toggle_favorite():
 @api_bp.route('/favorites', methods=['GET'])
 @jwt_login_required
 def get_my_favorites():
-    user_id = get_jwt_identity()
+    user_id   = int(get_jwt_identity())
     favorites = Favorite.query.filter_by(user_id=user_id).all()
     
     result = [
