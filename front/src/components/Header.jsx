@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../App'
 import { logout } from '../api/services'
+import PartyNotification from './PartyNotification'
 
 const NAV_LINKS = [
   { to: '/', label: '홈', end: true },
@@ -90,6 +91,7 @@ export default function Header() {
               </span>
             </Link>
 
+            {user && <PartyNotification />}
             {user ? (
               <button onClick={handleLogout} className={`${headerIconLink} group mr-1 max-md:hidden`}>
                 <img src="/img/icon/logout.png" className="h-[35px] w-[35px] object-contain" alt="logout" onError={(e) => { e.target.style.display="none" }} />
