@@ -269,6 +269,14 @@ export default function MyPage() {
         </div>
 
         <div className="profile-section">
+          {user?.role === 'admin' && (
+            <div style={{ marginBottom: 16 }}>
+              <Link to="/admin"
+                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 16px', background: '#FFF5F5', border: '1px solid #FED7D7', borderRadius: 10, textDecoration: 'none', fontWeight: 700, color: 'var(--color-danger)' }}>
+                ⚙️ 관리자 페이지로 이동
+              </Link>
+            </div>
+          )}
           <div className="mb-4 flex items-center justify-between gap-3">
             <h3>매너점수</h3>
             <Link to="/mypage/manner-history" className="btn btn-sm btn-secondary">상세 내역 →</Link>
