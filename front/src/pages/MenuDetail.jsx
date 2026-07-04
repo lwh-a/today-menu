@@ -1,3 +1,4 @@
+import ReviewModal from '../components/ReviewModal'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { createReview, getRestaurant, getReviews } from '../api/services'
@@ -42,6 +43,13 @@ function Stars({ value, size = 'text-sm', interactive = false, onSelect, hovered
         )
       })}
     </div>
+      {showReview && (
+        <ReviewModal
+          restId={rest?.restaurant_id ?? rest?.id}
+          restName={rest?.name}
+          onClose={() => setShowReview(false)}
+        />
+      )}
   )
 }
 
@@ -51,6 +59,7 @@ export default function MenuDetail() {
   const { user } = useAuth()
 
   const [rest, setRest] = useState(null)
+  const [showReview, setShowReview] = useState(false)
   const [reviews, setReviews] = useState([])
   const [reviewAvg, setReviewAvg] = useState(0)
   const [reviewCount, setReviewCount] = useState(0)
@@ -228,6 +237,12 @@ export default function MenuDetail() {
             <p className="mb-3 text-sm font-semibold leading-6 text-[var(--text-muted)]">
               {rest.address}
             </p>
+            {rest.business_hours && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, fontSize: '.85rem' }}>
+                <span style={{ color: 'var(--text-muted)' }}>🕐</span>
+                <span style={{ fontWeight: 700, color: 'var(--text-secondary)' }}>{rest.business_hours}</span>
+              </div>
+            )}
 
             {rest.latitude && rest.longitude ? (
               <>
@@ -241,7 +256,7 @@ export default function MenuDetail() {
                       category: rest.category,
                     },
                   ]}
-                  height="220px"
+                  height="260px"
                 />
 
                 <a
