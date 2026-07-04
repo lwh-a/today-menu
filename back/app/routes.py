@@ -107,9 +107,7 @@ def serialize_party(p, viewer_id=None):
         'status':       p.status.value,
         'is_member':    any(m.user_id == viewer_id for m in p.members) if viewer_id else False,
         'is_host':      p.host_id == viewer_id if viewer_id else False,
-        'is_host':      p.host_id == viewer_id if viewer_id else False,
         'created_at':   p.created_at.isoformat() if p.created_at else None,
-        # PartyDetail 참여자 목록에서 사용
         'members': [
             {
                 'user': {'user_id': m.user.user_id, 'nickname': m.user.nickname} if m.user else None,
@@ -944,7 +942,11 @@ def chatbot():
     if nearby_str and loc_name:
         nearby_str = f'[{loc_name} 근처] ' + nearby_str
 
-    all_rests = [f"{r.name}({r.category})" for r in Restaurant.query.limit(30).all()]
+    from sqlalchemy import text as _t_chat
+    _chat_rows = db.session.execute(_t_chat(
+        "SELECT name, category FROM restaurants ORDER BY avg_rating DESC LIMIT 30"
+    )).fetchall()
+    all_rests = [f"{row[0]}({row[1]})" for row in _chat_rows]
     all_rests_str = ', '.join(all_rests) or '등록된 식당 없음'
 
     if mode == 'recommend':
