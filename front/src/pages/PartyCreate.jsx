@@ -1,12 +1,22 @@
 import { useState, useEffect } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { createParty, getRestaurants } from '../api/services'
 
 export default function PartyCreate() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams] = useSearchParams()
+
+  // MenuDetail에서 state.restaurant 로 전달된 식당 자동 선택
+  const preselectedRest = location.state?.restaurant ?? null
+
   const [restaurants, setRestaurants] = useState([])
-  const [form, setForm] = useState({ title: '', restaurant_id: searchParams.get('rest') ?? '', meeting_time: '', max_people: 4 })
+  const [form, setForm] = useState({
+    title: '',
+    restaurant_id: preselectedRest?.restaurant_id ?? preselectedRest?.id ?? searchParams.get('rest') ?? '',
+    meeting_time: '',
+    max_people: 4,
+  })
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -74,7 +84,7 @@ export default function PartyCreate() {
             <div className="form-group">
               <label className="form-label">선택 식당</label>
               <div className="form-control">
-                {restaurants.find(r => r.id == form.restaurant_id)?.name || '선택된 식당 없음'}
+                {preselectedRest?.name || restaurants.find(r => r.restaurant_id == form.restaurant_id || r.id == form.restaurant_id)?.name || '선택된 식당 없음'}
               </div>
             </div>
 
