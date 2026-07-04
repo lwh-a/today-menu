@@ -132,20 +132,21 @@ export default function Home() {
   const [likedCafeteriaIds, setLikedCafeteriaIds] = useState(() => new Set())
   const bannerTimer = useRef(null)
 
-
-
   useEffect(() => {
+    const favPromise = user
+      ? getMyFavorites().catch(() => [])
+      : Promise.resolve([])
+
     Promise.all([
       getRestaurants({ cat: '전체', page: 1 }),
-      user ? getMyFavorites().catch(() => []) : Promise.resolve([])
+      favPromise
     ]).then(([d, favData]) => {
       const favIds = new Set((favData || []).map(f => f.id))
-      if (user) setLikedCafeteriaIds(favIds)
+      setLikedCafeteriaIds(favIds)
       const items = d.items?.length ? d.items : SAMPLE_RESTAURANTS
-      // is_liked를 favorites 데이터로 복원
       setTrending(items.map(r => ({
         ...r,
-        is_liked: favIds.has(r.id) || r.is_liked || false
+        is_liked: favIds.has(r.id) || Boolean(r.is_liked)
       })))
     }).catch((err) => {
       console.error('trending 로드 실패:', err)
@@ -177,6 +178,14 @@ export default function Home() {
   const visibleRestaurants = trending.length ? trending : SAMPLE_RESTAURANTS
 
   const handleCafeteriaLike = (item) => {
+    const isCurrentlyLiked = Boolean(item.is_liked) || likedCafeteriaIds.has(item.id)
+    // likedCafeteriaIds 업데이트
+    setLikedCafeteriaIds(prev => {
+      const next = new Set(prev)
+      if (isCurrentlyLiked) next.delete(item.id)
+      else next.add(item.id)
+      return next
+    })
     toggleFavoriteAction({
       id: item.id,
       list: trending,
