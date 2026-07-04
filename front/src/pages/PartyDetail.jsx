@@ -85,6 +85,11 @@ export default function PartyDetail() {
       console.error('소켓 오류:', err.message)
     })
 
+    // 새 파티원 참여 알림
+    socket.current.on('party_member_joined', (data) => {
+      setParty(prev => prev ? { ...prev, member_count: data.member_count } : prev)
+    })
+
     return () => {
       socket.current.emit('leave', { room_id: partyId, username: user.nickname })
       socket.current?.disconnect()
