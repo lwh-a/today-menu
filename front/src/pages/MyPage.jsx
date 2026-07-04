@@ -117,12 +117,30 @@ export default function MyPage() {
 
   // ── 찜 토글 ──────────────────────────────────────────────────────────────
   const handleLike = async (log) => {
-    toggleFavoriteAction({
-      id: log?.restaurant?.id ?? log?.log_id ?? log,
-      list: [],
-      setter: () => {},
-      type: 'log'
-    });
+    const targetId = log?.restaurant?.id ?? log?.log_id
+    // 낙관적 업데이트 — liked_logs에서 즉시 제거
+    setData(prev => ({
+      ...prev,
+      liked_logs: (prev?.liked_logs || []).filter(l =>
+        (l.restaurant?.id ?? l.restaurant?.restaurant_id ?? l.log_id) !== targetId
+      )
+    }))
+    // 서버에 찜 해제 요청
+    try {
+      if (log?.log_id) {
+        await toggleLike(log.log_id)
+      } else {
+        await toggleFavoriteAction({
+          id: targetId,
+          list: [],
+          setter: () => {},
+          type: 'log'
+        })
+      }
+    } catch {
+      // 실패 시 데이터 재로드
+      getMyPage().then(d => setData(d)).catch(() => {})
+    }
   }
 
   // 통계 카드 '찜한 메뉴' 클릭 시 찜목록 섹션으로 스크롤
