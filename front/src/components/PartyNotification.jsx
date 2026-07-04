@@ -42,18 +42,34 @@ export default function PartyNotification() {
           })
         }
 
-        // 2. 시간 임박 알림 (1시간 이내)
-        if (party.meeting_time && party.status === 'RECRUITING') {
+        // 2. 시간 임박 알림 — 10분 전, 5분 전 각 1번씩
+        if (party.meeting_time) {
           const meetingTime = new Date(party.meeting_time)
           const now = new Date()
           const diffMin = (meetingTime - now) / 60000
-          if (diffMin > 0 && diffMin <= 60) {
-            const alreadyNotified = notifications.find(n => n.id === `soon-${party.party_id}`)
+
+          // 10분 전 알림 (9~11분 사이)
+          if (diffMin > 9 && diffMin <= 11) {
+            const alreadyNotified = notifications.find(n => n.id === `soon10-${party.party_id}`)
             if (!alreadyNotified) {
               newNotes.push({
-                id: `soon-${party.party_id}`,
+                id: `soon10-${party.party_id}`,
                 type: 'soon',
-                message: `"${party.title}" 파티가 ${Math.round(diffMin)}분 후 시작됩니다!`,
+                message: `"${party.title}" 파티가 10분 후 시작됩니다! ⏰`,
+                party_id: party.party_id,
+                time: new Date(),
+              })
+            }
+          }
+
+          // 5분 전 알림 (4~6분 사이)
+          if (diffMin > 4 && diffMin <= 6) {
+            const alreadyNotified = notifications.find(n => n.id === `soon5-${party.party_id}`)
+            if (!alreadyNotified) {
+              newNotes.push({
+                id: `soon5-${party.party_id}`,
+                type: 'soon',
+                message: `"${party.title}" 파티가 5분 후 시작됩니다! 🍽️`,
                 party_id: party.party_id,
                 time: new Date(),
               })
