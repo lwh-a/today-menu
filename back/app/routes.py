@@ -85,7 +85,8 @@ def serialize_restaurant(r, like_count=None):
         'description': r.description,
         'phone':       phone,
         'avg_rating':  r.avg_rating,
-        'like_count':  like_count if like_count is not None else 0,
+        'like_count':     like_count if like_count is not None else 0,
+        'business_hours': getattr(r, 'business_hours', '') or '',
     }
 
 def serialize_party(p, viewer_id=None):
@@ -539,10 +540,19 @@ def join_party(party_id):
 
     user.manner_score = min(50.0, round(user.manner_score + 0.5, 1))
     db.session.commit()
-    
-    
-    return jsonify({'message': '파티에 참여했습니다! 매너온도 +0.5°', 'manner_score': user.manner_score}), 200
 
+    # 파티 방에 새 참여자 알림 소켓 emit
+    try:
+        from app import socketio as _sio
+        _sio.emit('party_member_joined', {
+            'party_id':     party_id,
+            'nickname':     user.nickname,
+            'member_count': len(party.members),
+        }, room=f'party_{party_id}')
+    except Exception:
+        pass
+
+    return jsonify({'message': '파티에 참여했습니다! 매너온도 +0.5°', 'manner_score': user.manner_score}), 200
 
 
 @party_bp.route('/<int:party_id>/chat', methods=['POST'])
