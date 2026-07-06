@@ -72,7 +72,6 @@ function Roulette() {
       ctx.restore()
     })
 
-    // 중앙 원
     ctx.beginPath()
     ctx.arc(cx, cy, 22, 0, 2 * Math.PI)
     ctx.fillStyle = '#fff'
@@ -86,7 +85,6 @@ function Roulette() {
     ctx.fillText('SPIN', cx, cy + 4)
   }, [items, slice])
 
-  // 카테고리 바뀌면 룰렛 다시 그리기 + 결과 초기화
   useEffect(() => {
     angleRef.current = 0
     setResult(null)
@@ -129,22 +127,14 @@ function Roulette() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-
-      {/* 카테고리 필터 - 룰렛 왼쪽 위 */}
       <div style={{ alignSelf: 'flex-start' }}>
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           style={{
-            padding: '6px 12px',
-            borderRadius: 8,
-            border: '1.5px solid var(--border-color)',
-            fontSize: '.88rem',
-            fontWeight: 700,
-            background: 'var(--bg-white)',
-            color: 'var(--text-primary)',
-            cursor: 'pointer',
-            outline: 'none',
+            padding: '6px 12px', borderRadius: 8, border: '1.5px solid var(--border-color)',
+            fontSize: '.88rem', fontWeight: 700, background: 'var(--bg-white)',
+            color: 'var(--text-primary)', cursor: 'pointer', outline: 'none',
           }}
         >
           {CATEGORIES.map(cat => (
@@ -161,6 +151,7 @@ function Roulette() {
       </div>
 
       {/* 룰렛 캔버스 */}
+
       {fetching ? (
         <div style={{ padding: 40, color: 'var(--text-muted)', textAlign: 'center' }}>
           <div style={{ fontSize: '2rem', marginBottom: 8 }}>🍽️</div>
@@ -170,21 +161,14 @@ function Roulette() {
         <div style={{ padding: 40, color: 'var(--text-muted)', textAlign: 'center' }}>
           <div style={{ fontSize: '2rem', marginBottom: 8 }}>😅</div>
           <div style={{ fontWeight: 700 }}>{category} 메뉴가 없습니다</div>
-          <div style={{ fontSize: '.82rem', marginTop: 4 }}>다른 카테고리를 선택해주세요</div>
         </div>
       ) : (
         <>
           <div style={{ position: 'relative' }}>
-            {/* 화살표 */}
             <div style={{
-              position: 'absolute', top: '50%', right: -10,
-              transform: 'translateY(-50%)',
-              width: 0, height: 0,
-              borderTop: '10px solid transparent',
-              borderBottom: '10px solid transparent',
-              borderRight: '20px solid #E53E3E',
-              zIndex: 10,
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,.3))',
+              position: 'absolute', top: '50%', right: -10, transform: 'translateY(-50%)',
+              width: 0, height: 0, borderTop: '10px solid transparent', borderBottom: '10px solid transparent',
+              borderRight: '20px solid #E53E3E', zIndex: 10, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,.3))',
             }} />
             <canvas ref={canvasRef} width={300} height={300}
               style={{ borderRadius: '50%', boxShadow: '0 4px 20px rgba(0,0,0,.15)', cursor: isSpinning ? 'default' : 'pointer' }}
@@ -192,46 +176,29 @@ function Roulette() {
             />
           </div>
 
-          <button
-            onClick={spin}
-            disabled={isSpinning}
+          <button onClick={spin} disabled={isSpinning}
             style={{
               padding: '12px 40px', borderRadius: 50,
               background: isSpinning ? 'var(--bg-surface)' : 'var(--color-primary)',
               color: isSpinning ? 'var(--text-muted)' : '#fff',
               border: 'none', fontWeight: 800, fontSize: '1rem',
-              cursor: isSpinning ? 'default' : 'pointer',
-              transition: 'all .2s',
+              cursor: isSpinning ? 'default' : 'pointer', transition: 'all .2s',
             }}>
             {isSpinning ? '🌀 돌아가는 중...' : '🎰 룰렛 돌리기!'}
           </button>
 
           {result && (
             <div style={{
-              width: '100%',
-              background: 'linear-gradient(135deg,#FFF5F5,#FED7D7)',
-              border: '2px solid var(--color-primary)',
-              borderRadius: 20, padding: '24px 28px', textAlign: 'center',
-              animation: 'popIn .4s ease',
+              width: '100%', background: 'linear-gradient(135deg,#FFF5F5,#FED7D7)',
+              border: '2px solid var(--color-primary)', borderRadius: 20, padding: '24px 28px', textAlign: 'center',
               boxShadow: '0 8px 24px rgba(244,108,111,.2)',
             }}>
-              <div style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--color-primary)', marginBottom: 8, letterSpacing: '.05em' }}>
-                🎉 오늘의 메뉴 당첨!
-              </div>
+              <div style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--color-primary)', marginBottom: 8 }}>🎉 오늘의 메뉴 당첨!</div>
               <div style={{ fontSize: '2.8rem', marginBottom: 8 }}>{catIcon(result.category)}</div>
-              <div style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: 4, color: 'var(--text-primary)' }}>
-                {result.name}
-              </div>
-              <div style={{ display: 'inline-block', background: 'rgba(244,108,111,.12)', color: 'var(--color-primary)', borderRadius: 20, padding: '3px 12px', fontSize: '.78rem', fontWeight: 700, marginBottom: 8 }}>
-                {result.category}
-              </div>
-              <div style={{ fontSize: '.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
-                📍 {result.address}
-              </div>
-              <Link to={`/menu/${result.id}`}
-                style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 50, background: 'var(--color-primary)', color: '#fff', fontSize: '.9rem', fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 12px rgba(244,108,111,.35)' }}>
-                식당 보러가기 →
-              </Link>
+              <div style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: 4, color: 'var(--text-primary)' }}>{result.name}</div>
+              <div style={{ display: 'inline-block', background: 'rgba(244,108,111,.12)', color: 'var(--color-primary)', borderRadius: 20, padding: '3px 12px', fontSize: '.78rem', fontWeight: 700, marginBottom: 8 }}>{result.category}</div>
+              <div style={{ fontSize: '.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>📍 {result.address}</div>
+              <Link to={`/menu/${result.id}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 50, background: 'var(--color-primary)', color: '#fff', fontSize: '.9rem', fontWeight: 800, textDecoration: 'none' }}>식당 보러가기 →</Link>
             </div>
           )}
         </>
@@ -368,7 +335,7 @@ function WorldCup({ menus }) {
 
   const init = () => {
     const pool = [...menus].sort(() => Math.random() - .5).slice(0, POOL)
-    setBracket(pool); setRound(0); setWinners([]); setRoundNum(1); setChampion(null)
+    setBracket(당구); setRound(0); setWinners([]); setChampion(null)
   }
   useEffect(() => { if (menus.length >= 4) init() }, [menus])
 
@@ -388,7 +355,7 @@ function WorldCup({ menus }) {
         if (newWinners.length === 1) {
           setChampion(newWinners[0])
         } else {
-          setBracket(newWinners); setRound(0); setWinners([]); setRoundNum(r => r + 1)
+          setBracket(newWinners); setRound(0); setWinners([])
         }
       } else {
         setRound(nextRound); setWinners(newWinners)
@@ -401,8 +368,7 @@ function WorldCup({ menus }) {
   if (champion) return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: '3rem', marginBottom: 8 }}>🏆</div>
-      <div style={{ fontWeight: 900, fontSize: '1.4rem', marginBottom: 4 }}>최종 우승!</div>
-      <div style={{ background: 'linear-gradient(135deg,#FFFFF0,#FEFCBF)', border: '3px solid var(--color-accent)', borderRadius: 20, padding: '28px 24px', margin: '16px 0', display: 'inline-block', minWidth: 200 }}>
+      <div style={{ background: 'linear-gradient(135deg,#FFFFF0,#FEFCBF)', border: '3px solid var(--color-accent)', borderRadius: 20, padding: '28px 24px', margin: '16px 0', display: 'inline-block' }}>
         <div style={{ fontSize: '3.5rem', marginBottom: 8 }}>{catIcon(champion.category)}</div>
         <div style={{ fontWeight: 900, fontSize: '1.5rem' }}>{champion.name}</div>
         <div style={{ fontSize: '.82rem', color: 'var(--text-muted)', marginTop: 4 }}>{champion.category}</div>
@@ -414,38 +380,29 @@ function WorldCup({ menus }) {
   return (
     <div>
       <div style={{ textAlign: 'center', marginBottom: 12 }}>
-        <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{roundLabel}</span>
-        <span style={{ color: 'var(--text-muted)', fontSize: '.82rem', marginLeft: 8 }}>{round + 1} / {totalMatches} 경기</span>
-      </div>
-      <div style={{ height: 5, background: 'var(--bg-surface)', borderRadius: 4, marginBottom: 20, overflow: 'hidden' }}>
-        <div style={{ height: '100%', background: 'var(--color-primary)', width: `${((round + 1) / totalMatches) * 100}%`, transition: 'width .3s' }} />
+        <span style={{ fontWeight: 800 }}>{roundLabel} ({round + 1}/{totalMatches})</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 12, alignItems: 'center' }}>
         {left && (
-          <button onClick={() => pick(left)}
-            style={{ border: `3px solid ${choosing === left.id ? 'var(--color-primary)' : 'var(--border-color)'}`, borderRadius: 16, padding: '20px 12px', cursor: 'pointer', background: choosing === left.id ? '#FFF5F5' : 'var(--bg-white)', transform: choosing === left.id ? 'scale(1.04)' : 'scale(1)', transition: 'all .2s', textAlign: 'center', width: '100%' }}>
+          <button onClick={() => pick(left)} style={{ border: `3px solid ${choosing === left.id ? 'var(--color-primary)' : 'var(--border-color)'}`, borderRadius: 16, padding: '20px 12px', cursor: 'pointer', background: 'var(--bg-white)', width: '100%' }}>
             <div style={{ fontSize: '2.8rem', marginBottom: 8 }}>{catIcon(left.category)}</div>
-            <div style={{ fontWeight: 800, fontSize: '.95rem', lineHeight: 1.3 }}>{left.name}</div>
-            <div style={{ fontSize: '.72rem', color: 'var(--text-muted)', marginTop: 4 }}>{left.category}</div>
+            <div style={{ fontWeight: 800 }}>{left.name}</div>
           </button>
         )}
-        <div style={{ textAlign: 'center', fontWeight: 900, fontSize: '1.3rem', color: 'var(--color-primary)', padding: '0 4px' }}>VS</div>
+        <div style={{ fontWeight: 900, color: 'var(--color-primary)' }}>VS</div>
         {right && (
-          <button onClick={() => pick(right)}
-            style={{ border: `3px solid ${choosing === right.id ? 'var(--color-primary)' : 'var(--border-color)'}`, borderRadius: 16, padding: '20px 12px', cursor: 'pointer', background: choosing === right.id ? '#FFF5F5' : 'var(--bg-white)', transform: choosing === right.id ? 'scale(1.04)' : 'scale(1)', transition: 'all .2s', textAlign: 'center', width: '100%' }}>
+          <button onClick={() => pick(right)} style={{ border: `3px solid ${choosing === right.id ? 'var(--color-primary)' : 'var(--border-color)'}`, borderRadius: 16, padding: '20px 12px', cursor: 'pointer', background: 'var(--bg-white)', width: '100%' }}>
             <div style={{ fontSize: '2.8rem', marginBottom: 8 }}>{catIcon(right.category)}</div>
-            <div style={{ fontWeight: 800, fontSize: '.95rem', lineHeight: 1.3 }}>{right.name}</div>
-            <div style={{ fontSize: '.72rem', color: 'var(--text-muted)', marginTop: 4 }}>{right.category}</div>
+            <div style={{ fontWeight: 800 }}>{right.name}</div>
           </button>
         )}
       </div>
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '.82rem', marginTop: 16 }}>더 먹고 싶은 메뉴를 선택하세요!</p>
     </div>
   )
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 게임 4 — 뽑기 (긁기)
+// 게임 4 — 뽑기 (긁기 복권)
 // ══════════════════════════════════════════════════════════════════════════════
 function ScratchCard({ menus }) {
   const canvasRef  = useRef(null)
@@ -464,20 +421,12 @@ function ScratchCard({ menus }) {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
-    const { width: w, height: h } = canvas
-    ctx.clearRect(0, 0, w, h)
-    const grad = ctx.createLinearGradient(0, 0, w, h)
-    grad.addColorStop(0, '#C0C0C0')
-    grad.addColorStop(.5, '#E8E8E8')
-    grad.addColorStop(1, '#A8A8A8')
-    ctx.fillStyle = grad
-    ctx.fillRect(0, 0, w, h)
-    ctx.fillStyle = '#888'
-    ctx.font = 'bold 16px sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText('🪙 긁어서 메뉴를 확인하세요!', w / 2, h / 2 - 8)
-    ctx.font = '13px sans-serif'
-    ctx.fillText('마우스 또는 손가락으로 긁기', w / 2, h / 2 + 16)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
+    grad.addColorStop(0, '#C0C0C0'); grad.addColorStop(1, '#A8A8A8')
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillStyle = '#888'; ctx.font = 'bold 15px sans-serif'; ctx.textAlign = 'center'
+    ctx.fillText('🪙 긁어서 메뉴를 확인하세요!', canvas.width / 2, canvas.height / 2 + 5)
   }, [pick])
 
   useEffect(() => { if (menus.length > 0) initCard() }, [menus, initCard])
@@ -487,9 +436,7 @@ function ScratchCard({ menus }) {
     if (!canvas || done) return
     const ctx = canvas.getContext('2d')
     ctx.globalCompositeOperation = 'destination-out'
-    ctx.beginPath()
-    ctx.arc(x, y, 22, 0, 2 * Math.PI)
-    ctx.fill()
+    ctx.beginPath(); ctx.arc(x, y, 22, 0, 2 * Math.PI); ctx.fill()
     ctx.globalCompositeOperation = 'source-over'
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
     let cleared = 0
@@ -501,10 +448,8 @@ function ScratchCard({ menus }) {
 
   const getPos = (e, canvas) => {
     const rect = canvas.getBoundingClientRect()
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
-    if (e.touches) return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY }
-    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY }
+    if (e.touches) return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top }
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
   }
 
   const onStart = (e) => { e.preventDefault(); scratching.current = true; scratch(...Object.values(getPos(e, canvasRef.current))) }
@@ -513,26 +458,142 @@ function ScratchCard({ menus }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-      <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-muted)' }}>🎟️ 오늘의 메뉴 복권</div>
-      <div style={{ position: 'relative', width: 300, height: 160, borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,.15)', border: '3px solid var(--color-accent)' }}>
+      <div style={{ position: 'relative', width: 300, height: 160, borderRadius: 16, overflow: 'hidden', border: '3px solid var(--color-accent)' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#FFFFF0,#FEFCBF)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          {prize && (<><div style={{ fontSize: '3rem', marginBottom: 4 }}>{catIcon(prize.category)}</div><div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{prize.name}</div><div style={{ fontSize: '.78rem', color: 'var(--text-muted)', marginTop: 3 }}>{prize.category}</div></>)}
+          {prize && (<><div style={{ fontSize: '3rem' }}>{catIcon(prize.category)}</div><div style={{ fontWeight: 900 }}>{prize.name}</div></>)}
         </div>
-        <canvas ref={canvasRef} width={300} height={160}
-          style={{ position: 'absolute', inset: 0, cursor: 'crosshair', touchAction: 'none', width: '100%', height: '100%' }}
-          onMouseDown={onStart} onMouseMove={onMove} onMouseUp={onEnd} onMouseLeave={onEnd}
-          onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
+        <canvas ref={canvasRef} width={300} height={160} style={{ position: 'absolute', inset: 0, cursor: 'crosshair', touchAction: 'none' }}
+          onMouseDown={(e) => { scratching.current = true; scratch(getPos(e, canvasRef.current).x, getPos(e, canvasRef.current).y) }}
+          onMouseMove={(e) => { if (scratching.current) scratch(getPos(e, canvasRef.current).x, getPos(e, canvasRef.current).y) }}
+          onMouseUp={() => scratching.current = false} onMouseLeave={() => scratching.current = false}
+          onTouchStart={(e) => { scratching.current = true; scratch(getPos(e, canvasRef.current).x, getPos(e, canvasRef.current).y) }}
+          onTouchMove={(e) => { if (scratching.current) scratch(getPos(e, canvasRef.current).x, getPos(e, canvasRef.current).y) }}
+          onTouchEnd={() => scratching.current = false}
         />
       </div>
-      {!done && (
-        <div style={{ width: 300 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.75rem', color: 'var(--text-muted)', marginBottom: 4 }}>
-            <span>긁은 정도</span><span>{revealed}% / {TARGET}% 완성</span>
-          </div>
-          <div style={{ height: 6, background: 'var(--bg-surface)', borderRadius: 4, overflow: 'hidden' }}>
-            <div style={{ height: '100%', background: 'var(--color-accent)', width: `${Math.min(revealed / TARGET * 100, 100)}%`, transition: 'width .1s' }} />
+      {done && prize && <Link to={`/menu/${prize.id}`} className="btn btn-primary">식당 보러가기 →</Link>}
+      <button onClick={initCard} className="btn btn-secondary">🎟️ 새 복권 뽑기</button>
+    </div>
+  )
+}
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 게임 5 — 사다리타기 (💡 선 겹침 버그 완전 해결!)
+// ══════════════════════════════════════════════════════════════════════════════
+function Ladder({ menus }) {
+  const MAX = 6
+  const canvasRef = useRef(null)
+  const [items,      setItems]      = useState([])   
+  const [inputVal,   setInputVal]   = useState('')
+  const [rungs,      setRungs]      = useState([])   
+  const [result,     setResult]     = useState(null) 
+  const [animPath,   setAnimPath]   = useState(null) 
+
+  const NUM_ROWS = 10   
+  const COLORS   = ['#E53E3E','#DD6B20','#F6AD55','#38A169','#3182CE','#6B46C1']
+
+  // 💡 가로선이 절대 연속으로 겹치지 않게 로직 대폭 수정
+  const generateRungs = useCallback((n) => {
+    const r = []
+    for (let row = 0; row < NUM_ROWS; row++) {
+      // 각 가로 줄(row)마다 랜덤하게 하나의 다리만 생성하도록 제한하여 선이 겹치는 현상 완전 방지
+      const col = Math.floor(Math.random() * (n - 1))
+      r.push({ row, col })
+    }
+    return r
+  }, [])
+
+  const tracePath = useCallback((topIdx, rungList) => {
+    let col = topIdx
+    const path = [{ row: -1, col }]
+    for (let row = 0; row < NUM_ROWS; row++) {
+      const goRight = rungList.find(r => r.row === row && r.col === col)
+      const goLeft  = rungList.find(r => r.row === row && r.col === col - 1)
+      if (goRight) { path.push({ row, col }); col += 1 } 
+      else if (goLeft) { path.push({ row, col }); col -= 1 }
+      path.push({ row, col })
+    }
+    return { bottomIdx: col, path }
+  }, [])
+
+  const draw = useCallback((highlightPath = null) => {
+    const canvas = canvasRef.current
+    if (!canvas || items.length < 2) return
+    const ctx  = canvas.getContext('2d')
+    const W    = canvas.width
+    const H    = canvas.height
+    const n    = items.length
+    const PAD  = 40
+    const TOP  = 52
+    const BOT  = H - 52
+    const step = (W - PAD * 2) / (n - 1)
+
+    ctx.clearRect(0, 0, W, H)
+    const xOf = (col) => PAD + col * step
+    const yOf = (row) => TOP + ((row + 1) / (NUM_ROWS + 1)) * (BOT - TOP)
+
+    // 세로선 그리기
+    for (let i = 0; i < n; i++) {
+      ctx.beginPath(); ctx.moveTo(xOf(i), TOP); ctx.lineTo(xOf(i), BOT)
+      ctx.strokeStyle = '#D1C4BE'; ctx.lineWidth = 3.5; ctx.stroke()
+    }
+    
+    // 가로선 그리기
+    rungs.forEach(({ row, col }) => {
+      ctx.beginPath(); ctx.moveTo(xOf(col), yOf(row)); ctx.lineTo(xOf(col + 1), yOf(row))
+      ctx.strokeStyle = '#B0A098'; ctx.lineWidth = 3.5; ctx.stroke()
+    })
+
+    // 선택된 경로 강조 표시
+    if (highlightPath && highlightPath.length >= 2) {
+      ctx.strokeStyle = COLORS[highlightPath[0].col % COLORS.length]; ctx.lineWidth = 5
+      ctx.lineCap = 'round'; ctx.lineJoin = 'round'
+      ctx.beginPath(); ctx.moveTo(xOf(highlightPath[0].col), TOP)
+      for (let i = 1; i < highlightPath.length; i++) {
+        ctx.lineTo(xOf(highlightPath[i].col), highlightPath[i].row === -1 ? TOP : yOf(highlightPath[i].row))
+      }
+      ctx.lineTo(xOf(highlightPath[highlightPath.length - 1].col), BOT); ctx.stroke()
+    }
+
+    // 상단 출발 숫자 노드
+    for (let i = 0; i < n; i++) {
+      const isH = highlightPath && highlightPath[0].col === i
+      ctx.beginPath(); ctx.arc(xOf(i), TOP - 14, 14, 0, 2 * Math.PI); ctx.fillStyle = isH ? COLORS[i % COLORS.length] : '#F3E7DD'; ctx.fill()
+      ctx.fillStyle = isH ? '#fff' : '#7A5C52'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(i + 1, xOf(i), TOP - 10)
+    }
+    
+    // 하단 결과 글자 노드
+    for (let i = 0; i < n; i++) {
+      const isR = highlightPath && highlightPath[highlightPath.length - 1].col === i
+      ctx.fillStyle = isR ? COLORS[highlightPath[0].col % COLORS.length] : '#5E4A44'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'
+      ctx.fillText(items[i].length > 5 ? items[i].slice(0, 5) + '…' : items[i], xOf(i), BOT + 22)
+    }
+  }, [items, rungs])
+
+  useEffect(() => { draw(animPath) }, [draw, animPath])
+
+  const addItem = () => {
+    const v = inputVal.trim()
+    if (!v || items.length >= MAX) return
+    const next = [...items, v]; setItems(next); setInputVal(''); setResult(null); setAnimPath(null)
+    const r = generateRungs(next.length); setRungs(r)
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, width: '100%' }}>
+      <div style={{ display: 'flex', gap: 8, width: '100%', maxWidth: 360 }}>
+        <input value={inputVal} onChange={e => setInputVal(e.target.value)} onKeyDown={e => e.key === 'Enter' && addItem()} placeholder="메뉴 입력 (최대 6개)" style={{ flex: 1, padding: '8px 12px', borderRadius: 8, border: '1px solid var(--border-color)', outline: 'none' }} />
+        <button onClick={addItem} className="btn btn-primary" style={{ padding: '8px 16px', borderRadius: 8 }}>추가</button>
+      </div>
+      {items.length >= 2 ? (
+        <div style={{ position: 'relative', width: '100%', maxWidth: 360, background: '#FAF6F0', borderRadius: 20, padding: 16, boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.03)' }}>
+          <canvas ref={canvasRef} width={340} height={380} style={{ width: '100%', display: 'block' }} />
+          <div style={{ position: 'absolute', top: 16, left: 16, right: 16, height: 40, display: 'flex' }}>
+            {items.map((_, i) => <div key={i} onClick={() => { const { bottomIdx, path } = tracePath(i, rungs); setAnimPath(path); setResult({ topIdx: i, bottomIdx }) }} style={{ flex: 1, cursor: 'pointer', borderRadius: 10 }} title={`${i + 1}번 번호 클릭`} />)}
           </div>
         </div>
+      ) : (
+        <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)', fontSize: '.9rem' }}>💡 아래 사다리에 태울 메뉴를 2개 이상 입력창에 적어 추가해 주세요!</div>
       )}
       {done && prize && (
         <div style={{ textAlign: 'center', animation: 'popIn .4s ease' }}>
@@ -541,10 +602,6 @@ function ScratchCard({ menus }) {
           <div style={{ fontSize: '.85rem', color: 'var(--text-muted)', marginTop: 4 }}>{prize.category}</div>
         </div>
       )}
-      <button onClick={initCard}
-        style={{ padding: '10px 32px', borderRadius: 50, border: 'none', background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', fontSize: '.9rem' }}>
-        🎟️ 새 복권 뽑기
-      </button>
     </div>
   )
 }
@@ -897,7 +954,7 @@ export default function Game() {
   const [loading,   setLoading]   = useState(true)
 
   useEffect(() => {
-    getRandomMenus(64)
+    getRandomMenus(50)
       .then(setMenus)
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -919,13 +976,13 @@ export default function Game() {
         {TABS.map(({ id, label, desc }) => (
           <button key={id} onClick={() => setActiveTab(id)}
             style={{
-              border: `2px solid ${activeTab === id ? 'var(--color-primary)' : 'var(--border-color)'}`,
-              borderRadius: 12, padding: '10px 6px', cursor: 'pointer', textAlign: 'center',
-              background: activeTab === id ? '#FFF5F5' : 'var(--bg-white)',
-              transition: 'all .15s',
-            }}>
-            <div style={{ fontSize: '.95rem', fontWeight: 800 }}>{label}</div>
-            <div style={{ fontSize: '.68rem', color: 'var(--text-muted)', marginTop: 2 }}>{desc}</div>
+              padding: '8px 16px', borderRadius: 20, border: 'none',
+              background: activeTab === tab.id ? 'var(--color-primary)' : 'var(--bg-surface)',
+              color: activeTab === tab.id ? '#fff' : 'var(--text-secondary)',
+              fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap'
+            }}
+          >
+            {tab.label}
           </button>
         ))}
       </div>
@@ -946,17 +1003,8 @@ export default function Game() {
           </>
         )}
       </div>
-
-      <style>{`
-        @keyframes popIn {
-          from { transform: scale(.85); opacity: 0; }
-          to   { transform: scale(1);  opacity: 1; }
-        }
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50%       { transform: translateY(-8px); }
-        }
-      `}</style>
     </div>
   )
 }
+
+export default Game
