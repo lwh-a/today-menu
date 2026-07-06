@@ -72,7 +72,6 @@ function Roulette() {
       ctx.restore()
     })
 
-    // 중앙 원
     ctx.beginPath()
     ctx.arc(cx, cy, 22, 0, 2 * Math.PI)
     ctx.fillStyle = '#fff'
@@ -86,7 +85,6 @@ function Roulette() {
     ctx.fillText('SPIN', cx, cy + 4)
   }, [items, slice])
 
-  // 카테고리 바뀌면 룰렛 다시 그리기 + 결과 초기화
   useEffect(() => {
     angleRef.current = 0
     setResult(null)
@@ -129,22 +127,14 @@ function Roulette() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-
-      {/* 카테고리 필터 - 룰렛 왼쪽 위 */}
       <div style={{ alignSelf: 'flex-start' }}>
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           style={{
-            padding: '6px 12px',
-            borderRadius: 8,
-            border: '1.5px solid var(--border-color)',
-            fontSize: '.88rem',
-            fontWeight: 700,
-            background: 'var(--bg-white)',
-            color: 'var(--text-primary)',
-            cursor: 'pointer',
-            outline: 'none',
+            padding: '6px 12px', borderRadius: 8, border: '1.5px solid var(--border-color)',
+            fontSize: '.88rem', fontWeight: 700, background: 'var(--bg-white)',
+            color: 'var(--text-primary)', cursor: 'pointer', outline: 'none',
           }}
         >
           {CATEGORIES.map(cat => (
@@ -161,6 +151,7 @@ function Roulette() {
       </div>
 
       {/* 룰렛 캔버스 */}
+
       {fetching ? (
         <div style={{ padding: 40, color: 'var(--text-muted)', textAlign: 'center' }}>
           <div style={{ fontSize: '2rem', marginBottom: 8 }}>🍽️</div>
@@ -170,21 +161,14 @@ function Roulette() {
         <div style={{ padding: 40, color: 'var(--text-muted)', textAlign: 'center' }}>
           <div style={{ fontSize: '2rem', marginBottom: 8 }}>😅</div>
           <div style={{ fontWeight: 700 }}>{category} 메뉴가 없습니다</div>
-          <div style={{ fontSize: '.82rem', marginTop: 4 }}>다른 카테고리를 선택해주세요</div>
         </div>
       ) : (
         <>
           <div style={{ position: 'relative' }}>
-            {/* 화살표 */}
             <div style={{
-              position: 'absolute', top: '50%', right: -10,
-              transform: 'translateY(-50%)',
-              width: 0, height: 0,
-              borderTop: '10px solid transparent',
-              borderBottom: '10px solid transparent',
-              borderRight: '20px solid #E53E3E',
-              zIndex: 10,
-              filter: 'drop-shadow(0 2px 4px rgba(0,0,0,.3))',
+              position: 'absolute', top: '50%', right: -10, transform: 'translateY(-50%)',
+              width: 0, height: 0, borderTop: '10px solid transparent', borderBottom: '10px solid transparent',
+              borderRight: '20px solid #E53E3E', zIndex: 10, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,.3))',
             }} />
             <canvas ref={canvasRef} width={300} height={300}
               style={{ borderRadius: '50%', boxShadow: '0 4px 20px rgba(0,0,0,.15)', cursor: isSpinning ? 'default' : 'pointer' }}
@@ -192,46 +176,29 @@ function Roulette() {
             />
           </div>
 
-          <button
-            onClick={spin}
-            disabled={isSpinning}
+          <button onClick={spin} disabled={isSpinning}
             style={{
               padding: '12px 40px', borderRadius: 50,
               background: isSpinning ? 'var(--bg-surface)' : 'var(--color-primary)',
               color: isSpinning ? 'var(--text-muted)' : '#fff',
               border: 'none', fontWeight: 800, fontSize: '1rem',
-              cursor: isSpinning ? 'default' : 'pointer',
-              transition: 'all .2s',
+              cursor: isSpinning ? 'default' : 'pointer', transition: 'all .2s',
             }}>
             {isSpinning ? '🌀 돌아가는 중...' : '🎰 룰렛 돌리기!'}
           </button>
 
           {result && (
             <div style={{
-              width: '100%',
-              background: 'linear-gradient(135deg,#FFF5F5,#FED7D7)',
-              border: '2px solid var(--color-primary)',
-              borderRadius: 20, padding: '24px 28px', textAlign: 'center',
-              animation: 'popIn .4s ease',
+              width: '100%', background: 'linear-gradient(135deg,#FFF5F5,#FED7D7)',
+              border: '2px solid var(--color-primary)', borderRadius: 20, padding: '24px 28px', textAlign: 'center',
               boxShadow: '0 8px 24px rgba(244,108,111,.2)',
             }}>
-              <div style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--color-primary)', marginBottom: 8, letterSpacing: '.05em' }}>
-                🎉 오늘의 메뉴 당첨!
-              </div>
+              <div style={{ fontSize: '.8rem', fontWeight: 700, color: 'var(--color-primary)', marginBottom: 8 }}>🎉 오늘의 메뉴 당첨!</div>
               <div style={{ fontSize: '2.8rem', marginBottom: 8 }}>{catIcon(result.category)}</div>
-              <div style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: 4, color: 'var(--text-primary)' }}>
-                {result.name}
-              </div>
-              <div style={{ display: 'inline-block', background: 'rgba(244,108,111,.12)', color: 'var(--color-primary)', borderRadius: 20, padding: '3px 12px', fontSize: '.78rem', fontWeight: 700, marginBottom: 8 }}>
-                {result.category}
-              </div>
-              <div style={{ fontSize: '.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>
-                📍 {result.address}
-              </div>
-              <Link to={`/menu/${result.id}`}
-                style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 50, background: 'var(--color-primary)', color: '#fff', fontSize: '.9rem', fontWeight: 800, textDecoration: 'none', boxShadow: '0 4px 12px rgba(244,108,111,.35)' }}>
-                식당 보러가기 →
-              </Link>
+              <div style={{ fontWeight: 900, fontSize: '1.5rem', marginBottom: 4, color: 'var(--text-primary)' }}>{result.name}</div>
+              <div style={{ display: 'inline-block', background: 'rgba(244,108,111,.12)', color: 'var(--color-primary)', borderRadius: 20, padding: '3px 12px', fontSize: '.78rem', fontWeight: 700, marginBottom: 8 }}>{result.category}</div>
+              <div style={{ fontSize: '.85rem', color: 'var(--text-muted)', marginBottom: 16 }}>📍 {result.address}</div>
+              <Link to={`/menu/${result.id}`} style={{ display: 'inline-block', padding: '10px 28px', borderRadius: 50, background: 'var(--color-primary)', color: '#fff', fontSize: '.9rem', fontWeight: 800, textDecoration: 'none' }}>식당 보러가기 →</Link>
             </div>
           )}
         </>
@@ -336,11 +303,7 @@ function TwentyQ({ menus }) {
           <div style={{ background: 'linear-gradient(135deg,#EBF8FF,#BEE3F8)', borderRadius: 16, padding: '24px 20px', marginBottom: 16 }}>
             <div style={{ fontSize: '2.5rem', marginBottom: 8 }}>{catIcon(guess.category)}</div>
             <div style={{ fontWeight: 900, fontSize: '1.4rem', marginBottom: 4 }}>{guess.name}</div>
-            <div style={{ fontSize: '.82rem', color: 'var(--text-muted)' }}>{guess.category} · {guess.address}</div>
-            <Link to={`/menu/${guess.id}`}
-              style={{ display: 'inline-block', marginTop: 12, padding: '6px 20px', background: '#3182CE', color: '#fff', borderRadius: 20, fontSize: '.82rem', fontWeight: 700, textDecoration: 'none' }}>
-              식당 보러가기 →
-            </Link>
+            <div style={{ fontSize: '.82rem', color: 'var(--text-muted)', marginTop: 4 }}>{guess.category}</div>
           </div>
           <button onClick={() => setReveal(!reveal)}
             style={{ fontSize: '.82rem', color: 'var(--text-muted)', background: 'none', border: '1px solid var(--border-color)', padding: '6px 14px', borderRadius: 8, cursor: 'pointer', marginBottom: 12 }}>
@@ -372,7 +335,7 @@ function WorldCup({ menus }) {
 
   const init = () => {
     const pool = [...menus].sort(() => Math.random() - .5).slice(0, POOL)
-    setBracket(pool); setRound(0); setWinners([]); setRoundNum(1); setChampion(null)
+    setBracket(당구); setRound(0); setWinners([]); setChampion(null)
   }
   useEffect(() => { if (menus.length >= 4) init() }, [menus])
 
@@ -392,7 +355,7 @@ function WorldCup({ menus }) {
         if (newWinners.length === 1) {
           setChampion(newWinners[0])
         } else {
-          setBracket(newWinners); setRound(0); setWinners([]); setRoundNum(r => r + 1)
+          setBracket(newWinners); setRound(0); setWinners([])
         }
       } else {
         setRound(nextRound); setWinners(newWinners)
@@ -405,15 +368,10 @@ function WorldCup({ menus }) {
   if (champion) return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: '3rem', marginBottom: 8 }}>🏆</div>
-      <div style={{ fontWeight: 900, fontSize: '1.4rem', marginBottom: 4 }}>최종 우승!</div>
-      <div style={{ background: 'linear-gradient(135deg,#FFFFF0,#FEFCBF)', border: '3px solid var(--color-accent)', borderRadius: 20, padding: '28px 24px', margin: '16px 0', display: 'inline-block', minWidth: 200 }}>
+      <div style={{ background: 'linear-gradient(135deg,#FFFFF0,#FEFCBF)', border: '3px solid var(--color-accent)', borderRadius: 20, padding: '28px 24px', margin: '16px 0', display: 'inline-block' }}>
         <div style={{ fontSize: '3.5rem', marginBottom: 8 }}>{catIcon(champion.category)}</div>
         <div style={{ fontWeight: 900, fontSize: '1.5rem' }}>{champion.name}</div>
-        <div style={{ fontSize: '.82rem', color: 'var(--text-muted)', marginTop: 4 }}>{champion.category} · {champion.address}</div>
-        <Link to={`/menu/${champion.id}`}
-          style={{ display: 'inline-block', marginTop: 14, padding: '8px 24px', background: 'var(--color-accent)', color: '#fff', borderRadius: 20, fontSize: '.88rem', fontWeight: 700, textDecoration: 'none' }}>
-          식당 보러가기 →
-        </Link>
+        <div style={{ fontSize: '.82rem', color: 'var(--text-muted)', marginTop: 4 }}>{champion.category}</div>
       </div>
       <div><button className="btn btn-secondary" onClick={init}>🔄 다시하기</button></div>
     </div>
@@ -422,38 +380,29 @@ function WorldCup({ menus }) {
   return (
     <div>
       <div style={{ textAlign: 'center', marginBottom: 12 }}>
-        <span style={{ fontWeight: 800, fontSize: '1.1rem' }}>{roundLabel}</span>
-        <span style={{ color: 'var(--text-muted)', fontSize: '.82rem', marginLeft: 8 }}>{round + 1} / {totalMatches} 경기</span>
-      </div>
-      <div style={{ height: 5, background: 'var(--bg-surface)', borderRadius: 4, marginBottom: 20, overflow: 'hidden' }}>
-        <div style={{ height: '100%', background: 'var(--color-primary)', width: `${((round + 1) / totalMatches) * 100}%`, transition: 'width .3s' }} />
+        <span style={{ fontWeight: 800 }}>{roundLabel} ({round + 1}/{totalMatches})</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 12, alignItems: 'center' }}>
         {left && (
-          <button onClick={() => pick(left)}
-            style={{ border: `3px solid ${choosing === left.id ? 'var(--color-primary)' : 'var(--border-color)'}`, borderRadius: 16, padding: '20px 12px', cursor: 'pointer', background: choosing === left.id ? '#FFF5F5' : 'var(--bg-white)', transform: choosing === left.id ? 'scale(1.04)' : 'scale(1)', transition: 'all .2s', textAlign: 'center', width: '100%' }}>
+          <button onClick={() => pick(left)} style={{ border: `3px solid ${choosing === left.id ? 'var(--color-primary)' : 'var(--border-color)'}`, borderRadius: 16, padding: '20px 12px', cursor: 'pointer', background: 'var(--bg-white)', width: '100%' }}>
             <div style={{ fontSize: '2.8rem', marginBottom: 8 }}>{catIcon(left.category)}</div>
-            <div style={{ fontWeight: 800, fontSize: '.95rem', lineHeight: 1.3 }}>{left.name}</div>
-            <div style={{ fontSize: '.72rem', color: 'var(--text-muted)', marginTop: 4 }}>{left.category}</div>
+            <div style={{ fontWeight: 800 }}>{left.name}</div>
           </button>
         )}
-        <div style={{ textAlign: 'center', fontWeight: 900, fontSize: '1.3rem', color: 'var(--color-primary)', padding: '0 4px' }}>VS</div>
+        <div style={{ fontWeight: 900, color: 'var(--color-primary)' }}>VS</div>
         {right && (
-          <button onClick={() => pick(right)}
-            style={{ border: `3px solid ${choosing === right.id ? 'var(--color-primary)' : 'var(--border-color)'}`, borderRadius: 16, padding: '20px 12px', cursor: 'pointer', background: choosing === right.id ? '#FFF5F5' : 'var(--bg-white)', transform: choosing === right.id ? 'scale(1.04)' : 'scale(1)', transition: 'all .2s', textAlign: 'center', width: '100%' }}>
+          <button onClick={() => pick(right)} style={{ border: `3px solid ${choosing === right.id ? 'var(--color-primary)' : 'var(--border-color)'}`, borderRadius: 16, padding: '20px 12px', cursor: 'pointer', background: 'var(--bg-white)', width: '100%' }}>
             <div style={{ fontSize: '2.8rem', marginBottom: 8 }}>{catIcon(right.category)}</div>
-            <div style={{ fontWeight: 800, fontSize: '.95rem', lineHeight: 1.3 }}>{right.name}</div>
-            <div style={{ fontSize: '.72rem', color: 'var(--text-muted)', marginTop: 4 }}>{right.category}</div>
+            <div style={{ fontWeight: 800 }}>{right.name}</div>
           </button>
         )}
       </div>
-      <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '.82rem', marginTop: 16 }}>더 먹고 싶은 메뉴를 선택하세요!</p>
     </div>
   )
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-// 게임 4 — 뽑기 (긁기)
+// 게임 4 — 뽑기 (긁기 복권)
 // ══════════════════════════════════════════════════════════════════════════════
 function ScratchCard({ menus }) {
   const canvasRef  = useRef(null)
@@ -472,20 +421,12 @@ function ScratchCard({ menus }) {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')
-    const { width: w, height: h } = canvas
-    ctx.clearRect(0, 0, w, h)
-    const grad = ctx.createLinearGradient(0, 0, w, h)
-    grad.addColorStop(0, '#C0C0C0')
-    grad.addColorStop(.5, '#E8E8E8')
-    grad.addColorStop(1, '#A8A8A8')
-    ctx.fillStyle = grad
-    ctx.fillRect(0, 0, w, h)
-    ctx.fillStyle = '#888'
-    ctx.font = 'bold 16px sans-serif'
-    ctx.textAlign = 'center'
-    ctx.fillText('🪙 긁어서 메뉴를 확인하세요!', w / 2, h / 2 - 8)
-    ctx.font = '13px sans-serif'
-    ctx.fillText('마우스 또는 손가락으로 긁기', w / 2, h / 2 + 16)
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+    const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
+    grad.addColorStop(0, '#C0C0C0'); grad.addColorStop(1, '#A8A8A8')
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.fillStyle = '#888'; ctx.font = 'bold 15px sans-serif'; ctx.textAlign = 'center'
+    ctx.fillText('🪙 긁어서 메뉴를 확인하세요!', canvas.width / 2, canvas.height / 2 + 5)
   }, [pick])
 
   useEffect(() => { if (menus.length > 0) initCard() }, [menus, initCard])
@@ -495,9 +436,7 @@ function ScratchCard({ menus }) {
     if (!canvas || done) return
     const ctx = canvas.getContext('2d')
     ctx.globalCompositeOperation = 'destination-out'
-    ctx.beginPath()
-    ctx.arc(x, y, 22, 0, 2 * Math.PI)
-    ctx.fill()
+    ctx.beginPath(); ctx.arc(x, y, 22, 0, 2 * Math.PI); ctx.fill()
     ctx.globalCompositeOperation = 'source-over'
     const data = ctx.getImageData(0, 0, canvas.width, canvas.height).data
     let cleared = 0
@@ -509,10 +448,8 @@ function ScratchCard({ menus }) {
 
   const getPos = (e, canvas) => {
     const rect = canvas.getBoundingClientRect()
-    const scaleX = canvas.width / rect.width
-    const scaleY = canvas.height / rect.height
-    if (e.touches) return { x: (e.touches[0].clientX - rect.left) * scaleX, y: (e.touches[0].clientY - rect.top) * scaleY }
-    return { x: (e.clientX - rect.left) * scaleX, y: (e.clientY - rect.top) * scaleY }
+    if (e.touches) return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top }
+    return { x: e.clientX - rect.left, y: e.clientY - rect.top }
   }
 
   const onStart = (e) => { e.preventDefault(); scratching.current = true; scratch(...Object.values(getPos(e, canvasRef.current))) }
@@ -521,83 +458,85 @@ function ScratchCard({ menus }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-      <div style={{ fontWeight: 800, fontSize: '1.1rem', color: 'var(--text-muted)' }}>🎟️ 오늘의 메뉴 복권</div>
-      <div style={{ position: 'relative', width: 300, height: 160, borderRadius: 16, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,.15)', border: '3px solid var(--color-accent)' }}>
+      <div style={{ position: 'relative', width: 300, height: 160, borderRadius: 16, overflow: 'hidden', border: '3px solid var(--color-accent)' }}>
         <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg,#FFFFF0,#FEFCBF)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-          {prize && (<><div style={{ fontSize: '3rem', marginBottom: 4 }}>{catIcon(prize.category)}</div><div style={{ fontWeight: 900, fontSize: '1.2rem' }}>{prize.name}</div><div style={{ fontSize: '.78rem', color: 'var(--text-muted)', marginTop: 3 }}>{prize.category}</div></>)}
+          {prize && (<><div style={{ fontSize: '3rem' }}>{catIcon(prize.category)}</div><div style={{ fontWeight: 900 }}>{prize.name}</div></>)}
         </div>
-        <canvas ref={canvasRef} width={300} height={160}
-          style={{ position: 'absolute', inset: 0, cursor: 'crosshair', touchAction: 'none', width: '100%', height: '100%' }}
-          onMouseDown={onStart} onMouseMove={onMove} onMouseUp={onEnd} onMouseLeave={onEnd}
-          onTouchStart={onStart} onTouchMove={onMove} onTouchEnd={onEnd}
+        <canvas ref={canvasRef} width={300} height={160} style={{ position: 'absolute', inset: 0, cursor: 'crosshair', touchAction: 'none' }}
+          onMouseDown={(e) => { scratching.current = true; scratch(getPos(e, canvasRef.current).x, getPos(e, canvasRef.current).y) }}
+          onMouseMove={(e) => { if (scratching.current) scratch(getPos(e, canvasRef.current).x, getPos(e, canvasRef.current).y) }}
+          onMouseUp={() => scratching.current = false} onMouseLeave={() => scratching.current = false}
+          onTouchStart={(e) => { scratching.current = true; scratch(getPos(e, canvasRef.current).x, getPos(e, canvasRef.current).y) }}
+          onTouchMove={(e) => { if (scratching.current) scratch(getPos(e, canvasRef.current).x, getPos(e, canvasRef.current).y) }}
+          onTouchEnd={() => scratching.current = false}
         />
       </div>
-      {!done && (
-        <div style={{ width: 300 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '.75rem', color: 'var(--text-muted)', marginBottom: 4 }}>
-            <span>긁은 정도</span><span>{revealed}% / {TARGET}% 완성</span>
-          </div>
-          <div style={{ height: 6, background: 'var(--bg-surface)', borderRadius: 4, overflow: 'hidden' }}>
-            <div style={{ height: '100%', background: 'var(--color-accent)', width: `${Math.min(revealed / TARGET * 100, 100)}%`, transition: 'width .1s' }} />
-          </div>
-        </div>
-      )}
-      {done && prize && (
-        <div style={{ textAlign: 'center', animation: 'popIn .4s ease' }}>
-          <div style={{ fontWeight: 900, fontSize: '1rem', color: 'var(--color-accent)', marginBottom: 8 }}>🎉 당첨!</div>
-          <Link to={`/menu/${prize.id}`}
-            style={{ display: 'inline-block', padding: '8px 24px', background: 'var(--color-accent)', color: '#fff', borderRadius: 20, fontSize: '.88rem', fontWeight: 700, textDecoration: 'none' }}>
-            식당 보러가기 →
-          </Link>
-        </div>
-      )}
-      <button onClick={initCard}
-        style={{ padding: '10px 32px', borderRadius: 50, border: 'none', background: 'var(--bg-surface)', color: 'var(--text-secondary)', fontWeight: 700, cursor: 'pointer', fontSize: '.9rem' }}>
-        🎟️ 새 복권 뽑기
-      </button>
+      {done && prize && <Link to={`/menu/${prize.id}`} className="btn btn-primary">식당 보러가기 →</Link>}
+      <button onClick={initCard} className="btn btn-secondary">🎟️ 새 복권 뽑기</button>
     </div>
   )
 }
+
 
 // ══════════════════════════════════════════════════════════════════════════════
 // 게임 5 — 사다리타기
 // ══════════════════════════════════════════════════════════════════════════════
 function Ladder({ menus }) {
-  const MAX = 6
+  const MAX    = 6
+  const NUM_ROWS = 10
+  const COLORS = ['#E53E3E','#DD6B20','#F6AD55','#38A169','#3182CE','#6B46C1']
+
   const canvasRef = useRef(null)
-  const [items,      setItems]      = useState([])   // 메뉴 목록
-  const [inputVal,   setInputVal]   = useState('')
-  const [rungs,      setRungs]      = useState([])   // 사다리 가로줄
-  const [result,     setResult]     = useState(null) // { topIdx, bottomIdx }
-  const [animPath,   setAnimPath]   = useState(null) // 현재 하이라이트 경로
-  const [fetching,   setFetching]   = useState(false)
+  const [items,    setItems]    = useState([])
+  const [inputVal, setInputVal] = useState('')
+  // ladder: { rungs: [{row,col}], yPositions: [y0,y1,...] } — yPositions는 실제 픽셀 Y값
+  const [ladder,   setLadder]   = useState({ rungs: [], yPositions: [] })
+  const [result,   setResult]   = useState(null)
+  const [animPath, setAnimPath] = useState(null)
+  const [fetching, setFetching] = useState(false)
 
-  const NUM_ROWS = 9   // 세로 구간 수
-  const COLORS   = ['#E53E3E','#DD6B20','#F6AD55','#38A169','#3182CE','#6B46C1']
+  // ── 사다리 생성 핵심 규칙 ─────────────────────────────────────────────────
+  // 규칙: 같은 row에서 어떤 세로줄도 좌우 동시에 연결 금지 (Y자 교차 방지)
+  const buildLadder = useCallback((n, canvasH) => {
+    const PAD = 36, TOP = 52, BOT = canvasH - 52
 
-  // ── 사다리 가로줄 생성 ────────────────────────────────────────────────────
-  const generateRungs = useCallback((n) => {
-    const r = []
+    // 1) 각 row의 Y 위치를 불균등하게 생성
+    //    → 구간을 NUM_ROWS+1 등분 후, 각 구간 내 랜덤 위치 선택
+    const segH = (BOT - TOP) / (NUM_ROWS + 1)
+    const yPositions = Array.from({ length: NUM_ROWS }, (_, i) => {
+      const base = TOP + (i + 1) * segH
+      // 각 구간의 ±35% 범위 내 랜덤
+      const jitter = segH * (0.15 + Math.random() * 0.7 - 0.35)
+      return Math.round(base + jitter)
+    })
+
+    // 2) 가로줄 생성: connectedLines로 Y자 교차 완전 방지
+    const rungs = []
     for (let row = 0; row < NUM_ROWS; row++) {
-      let last = -2
-      const cols = Array.from({ length: n - 1 }, (_, i) => i).sort(() => Math.random() - .5)
-      for (const col of cols) {
-        if (col !== last + 1 && Math.random() > .45) {
-          r.push({ row, col })
-          last = col
+      const connectedLines = new Set() // 이 row에서 이미 연결된 세로줄
+      const gaps = Array.from({ length: n - 1 }, (_, i) => i)
+        .sort(() => Math.random() - 0.5)
+
+      for (const gap of gaps) {
+        // gap은 세로줄 gap과 gap+1을 연결
+        // 두 세로줄 모두 아직 이 row에서 연결 안 됐을 때만 추가
+        if (!connectedLines.has(gap) && !connectedLines.has(gap + 1) && Math.random() > 0.38) {
+          rungs.push({ row, col: gap })
+          connectedLines.add(gap)
+          connectedLines.add(gap + 1)
         }
       }
     }
-    return r
+    return { rungs, yPositions }
   }, [])
 
   // ── 경로 추적 ─────────────────────────────────────────────────────────────
-  const tracePath = useCallback((topIdx, rungList) => {
+  const tracePath = useCallback((topIdx, rungs) => {
     let col = topIdx
     const path = [{ row: -1, col }]
     for (let row = 0; row < NUM_ROWS; row++) {
-      const goRight = rungList.find(r => r.row === row && r.col === col)
-      const goLeft  = rungList.find(r => r.row === row && r.col === col - 1)
+      const goRight = rungs.find(r => r.row === row && r.col === col)
+      const goLeft  = rungs.find(r => r.row === row && r.col === col - 1)
       if      (goRight) col += 1
       else if (goLeft)  col -= 1
       path.push({ row, col })
@@ -608,7 +547,7 @@ function Ladder({ menus }) {
   // ── 캔버스 그리기 ─────────────────────────────────────────────────────────
   const draw = useCallback((highlightPath = null) => {
     const canvas = canvasRef.current
-    if (!canvas || items.length < 2) return
+    if (!canvas || items.length < 2 || ladder.yPositions.length === 0) return
     const ctx  = canvas.getContext('2d')
     const W    = canvas.width
     const H    = canvas.height
@@ -621,9 +560,9 @@ function Ladder({ menus }) {
     ctx.clearRect(0, 0, W, H)
 
     const xOf = (col) => PAD + col * step
-    const yOf = (row) => TOP + (row + 1) * ((BOT - TOP) / (NUM_ROWS + 1))
+    const yOf = (row) => ladder.yPositions[row] ?? (TOP + (row + 1) * (BOT - TOP) / (NUM_ROWS + 1))
 
-    // ── 세로줄 ───────────────────────────────────────────────────────────────
+    // 세로줄
     for (let i = 0; i < n; i++) {
       ctx.beginPath()
       ctx.moveTo(xOf(i), TOP)
@@ -633,17 +572,17 @@ function Ladder({ menus }) {
       ctx.stroke()
     }
 
-    // ── 가로줄 ───────────────────────────────────────────────────────────────
-    rungs.forEach(({ row, col }) => {
+    // 가로줄
+    ladder.rungs.forEach(({ row, col }) => {
       ctx.beginPath()
-      ctx.moveTo(xOf(col), yOf(row))
+      ctx.moveTo(xOf(col),     yOf(row))
       ctx.lineTo(xOf(col + 1), yOf(row))
-      ctx.strokeStyle = '#B0A098'
+      ctx.strokeStyle = '#A09090'
       ctx.lineWidth   = 3
       ctx.stroke()
     })
 
-    // ── 하이라이트 경로 ───────────────────────────────────────────────────────
+    // 하이라이트 경로
     if (highlightPath && highlightPath.length >= 2) {
       const color = COLORS[highlightPath[0].col % COLORS.length]
       ctx.strokeStyle = color
@@ -656,7 +595,6 @@ function Ladder({ menus }) {
         const prev = highlightPath[i - 1]
         const cur  = highlightPath[i]
         const y    = yOf(cur.row)
-        // 가로 이동
         if (prev.col !== cur.col) {
           ctx.lineTo(xOf(prev.col), y)
           ctx.lineTo(xOf(cur.col), y)
@@ -668,29 +606,29 @@ function Ladder({ menus }) {
       ctx.stroke()
     }
 
-    // ── 상단 라벨 (번호) ──────────────────────────────────────────────────────
+    // 상단 번호
     for (let i = 0; i < n; i++) {
-      const isHighlight = highlightPath && highlightPath[0].col === i
+      const hl = highlightPath && highlightPath[0].col === i
       ctx.beginPath()
       ctx.arc(xOf(i), TOP - 14, 14, 0, 2 * Math.PI)
-      ctx.fillStyle = isHighlight ? COLORS[i % COLORS.length] : '#F3E7DD'
+      ctx.fillStyle = hl ? COLORS[i % COLORS.length] : '#F3E7DD'
       ctx.fill()
-      ctx.fillStyle = isHighlight ? '#fff' : '#7A5C52'
+      ctx.fillStyle = hl ? '#fff' : '#7A5C52'
       ctx.font      = 'bold 12px sans-serif'
       ctx.textAlign = 'center'
       ctx.fillText(i + 1, xOf(i), TOP - 10)
     }
 
-    // ── 하단 라벨 (메뉴명) ────────────────────────────────────────────────────
+    // 하단 메뉴명
     for (let i = 0; i < n; i++) {
-      const isResult = highlightPath && highlightPath[highlightPath.length - 1].col === i
-      ctx.fillStyle = isResult ? COLORS[highlightPath[0].col % COLORS.length] : '#5E4A44'
-      ctx.font      = `bold ${isResult ? 12 : 11}px sans-serif`
+      const isRes = highlightPath && highlightPath[highlightPath.length - 1].col === i
+      ctx.fillStyle = isRes ? COLORS[highlightPath[0].col % COLORS.length] : '#5E4A44'
+      ctx.font      = `bold ${isRes ? 12 : 11}px sans-serif`
       ctx.textAlign = 'center'
       const label = items[i].length > 5 ? items[i].slice(0, 5) + '…' : items[i]
       ctx.fillText(label, xOf(i), BOT + 20)
     }
-  }, [items, rungs])
+  }, [items, ladder])
 
   useEffect(() => { draw(animPath) }, [draw, animPath])
 
@@ -703,7 +641,7 @@ function Ladder({ menus }) {
     setInputVal('')
     setResult(null)
     setAnimPath(null)
-    setRungs(generateRungs(next.length))
+    setLadder(buildLadder(next.length, 420))
   }
 
   const removeItem = (idx) => {
@@ -711,7 +649,8 @@ function Ladder({ menus }) {
     setItems(next)
     setResult(null)
     setAnimPath(null)
-    if (next.length >= 2) setRungs(generateRungs(next.length))
+    if (next.length >= 2) setLadder(buildLadder(next.length, 420))
+    else setLadder({ rungs: [], yPositions: [] })
   }
 
   // ── 랜덤 메뉴 불러오기 ───────────────────────────────────────────────────
@@ -723,7 +662,7 @@ function Ladder({ menus }) {
         setItems(names)
         setResult(null)
         setAnimPath(null)
-        setRungs(generateRungs(names.length))
+        setLadder(buildLadder(names.length, 420))
       })
       .catch(() => {})
       .finally(() => setFetching(false))
@@ -734,13 +673,13 @@ function Ladder({ menus }) {
     if (items.length < 2) return
     setResult(null)
     setAnimPath(null)
-    setRungs(generateRungs(items.length))
+    setLadder(buildLadder(items.length, 420))
   }
 
   // ── 번호 클릭 → 경로 추적 ────────────────────────────────────────────────
   const handlePick = (topIdx) => {
     if (items.length < 2) return
-    const { bottomIdx, path } = tracePath(topIdx, rungs)
+    const { bottomIdx, path } = tracePath(topIdx, ladder.rungs)
     setAnimPath(path)
     setResult({ topIdx, bottomIdx })
   }
@@ -881,13 +820,13 @@ const TABS = [
   { id: 'ladder',   label: '🪜 사다리',   desc: '사다리타기' },
 ]
 
-export default function Game() {
+function Game() {
   const [activeTab, setActiveTab] = useState('roulette')
   const [menus,     setMenus]     = useState([])
   const [loading,   setLoading]   = useState(true)
 
   useEffect(() => {
-    getRandomMenus(64)
+    getRandomMenus(50)
       .then(setMenus)
       .catch(() => {})
       .finally(() => setLoading(false))
@@ -895,7 +834,11 @@ export default function Game() {
 
   return (
     <div className="game-wrap" style={{ maxWidth: 640 }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 6 }}>🎮 게임창</h1>
+      <h1 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: 6, display: 'flex', alignItems: 'center', gap: 10 }}>
+        <img src="/img/icon/logo.png" alt="오늘 뭐먹지?" style={{ height: 38, width: 38, objectFit: 'contain' }}
+          onError={(e) => { e.target.style.display = 'none' }} />
+        🎮 게임창
+      </h1>
       <p style={{ color: 'var(--text-muted)', fontSize: '.88rem', marginBottom: 24 }}>
         게임으로 오늘 메뉴를 정해보세요!
       </p>
@@ -905,13 +848,13 @@ export default function Game() {
         {TABS.map(({ id, label, desc }) => (
           <button key={id} onClick={() => setActiveTab(id)}
             style={{
-              border: `2px solid ${activeTab === id ? 'var(--color-primary)' : 'var(--border-color)'}`,
-              borderRadius: 12, padding: '10px 6px', cursor: 'pointer', textAlign: 'center',
-              background: activeTab === id ? '#FFF5F5' : 'var(--bg-white)',
-              transition: 'all .15s',
-            }}>
-            <div style={{ fontSize: '.95rem', fontWeight: 800 }}>{label}</div>
-            <div style={{ fontSize: '.68rem', color: 'var(--text-muted)', marginTop: 2 }}>{desc}</div>
+              padding: '8px 16px', borderRadius: 20, border: 'none',
+              background: activeTab === id ? 'var(--color-primary)' : 'var(--bg-surface)', // 👈 tab.id에서 id로 변경
+              color: activeTab === id ? '#fff' : 'var(--text-secondary)',                  // 👈 tab.id에서 id로 변경
+              fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap'
+            }}
+          >
+            {label} {/* 👈 tab.label에서 label로 변경 */}
           </button>
         ))}
       </div>
@@ -932,17 +875,8 @@ export default function Game() {
           </>
         )}
       </div>
-
-      <style>{`
-        @keyframes popIn {
-          from { transform: scale(.85); opacity: 0; }
-          to   { transform: scale(1);  opacity: 1; }
-        }
-        @keyframes bounce {
-          0%, 100% { transform: translateY(0); }
-          50%       { transform: translateY(-8px); }
-        }
-      `}</style>
     </div>
   )
 }
+
+export default Game

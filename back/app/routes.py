@@ -4,6 +4,7 @@ import requests as req_lib
 from datetime import datetime
 from functools import wraps
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import func
 
 from flask import Blueprint, request, jsonify, send_from_directory
 from flask_jwt_extended import (
@@ -17,7 +18,7 @@ from app.models import (  # noqa
 
     User, Restaurant, Party, PartyMember,
     ChatMessage, RecommendationLog, MannerVote, StatusEnum, RoleEnum,
-    Report, Inquiry, Review, Favorite, Notice
+    Report, Inquiry, Review, Favorite, Notice, Menu, Category
 )
 
 # ── 블루프린트 ────────────────────────────────────────────────────────────────
@@ -155,6 +156,38 @@ def index():
         'open_parties': [serialize_party(p) for p in open_parties],
         'categories':   CATEGORIES,
     })
+
+@main_bp.route('/api/menu/trending', methods=['GET'])
+def get_trending_data():
+    from sqlalchemy import func as sa_func
+
+    liked_sub = (
+        db.session.query(
+            RecommendationLog.recommended_restaurant_id.label('rest_id'),
+            sa_func.count(RecommendationLog.log_id).label('like_count')
+        )
+        .filter(RecommendationLog.is_liked == True)
+        .group_by(RecommendationLog.recommended_restaurant_id)
+        .subquery()
+    )
+    
+    trending = (
+        Restaurant.query
+        .outerjoin(liked_sub, Restaurant.restaurant_id == liked_sub.c.rest_id)
+        .order_by(sa_func.coalesce(liked_sub.c.like_count, 0).desc())
+        .limit(8)
+        .all()
+    )
+    
+    results = []
+    for r in trending:
+        count = db.session.query(sa_func.count(RecommendationLog.log_id))\
+            .filter(RecommendationLog.recommended_restaurant_id == r.restaurant_id, 
+                    RecommendationLog.is_liked == True).scalar()
+        results.append(serialize_restaurant(r, like_count=count))
+        
+    return jsonify({'items': results})
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # AUTH
@@ -341,6 +374,40 @@ def naver_login():
     access_token, refresh_token, user = _social_login_or_register(email, nickname, 'naver')
     return jsonify({'access_token': access_token, 'refresh_token': refresh_token, **serialize_user(user)}), 200
 
+# ── 비밀번호 찾기 ─────────────────────────────────────────────────────────────
+@auth_bp.route('/reset-password-direct', methods=['POST'])
+def reset_password_direct():
+    data = request.get_json()
+    
+    # 프론트엔드 payload와 매핑
+    email        = data.get('email', '').strip()
+    nickname     = data.get('nickname', '').strip()
+    new_password = data.get('new_password', '')
+    new_password2 = data.get('new_password2', '')
+
+    # 1. 빈 값 방어 코드
+    if not email or not nickname or not new_password or not new_password2:
+        return jsonify({'message': '모든 항목을 입력해주세요.'}), 400
+
+    # 2. 새 비밀번호 일치 여부 체크
+    if new_password != new_password2:
+        return jsonify({'message': '새 비밀번호가 일치하지 않습니다.'}), 400
+
+    # 3. 🔍 핵심: 이메일과 닉네임이 동시에 일치하는 유저가 존재하는지 찾기
+    user = User.query.filter_by(email=email, nickname=nickname).first()
+    
+    # 일치하는 유저가 없으면 보안상 뜬구름 잡지 않고 즉시 튕겨냅니다.
+    if not user:
+        return jsonify({'message': '입력하신 이메일과 닉네임 정보가 일치하는 회원이 없습니다.'}), 404
+
+    # 4. 안전하게 암호화(해싱)하여 비밀번호 덮어쓰기
+    user.password = generate_password_hash(new_password)
+    db.session.commit()
+
+    return jsonify({'message': '비밀번호가 성공적으로 재설정되었습니다.'}), 200
+
+
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # MENU / RESTAURANT
@@ -383,7 +450,11 @@ def list_restaurants():
 @menu_bp.route('/<int:rest_id>', methods=['GET'])
 def get_restaurant(rest_id):
     rest = Restaurant.query.get_or_404(rest_id)
-    return jsonify(serialize_restaurant(rest))
+    raw_count = db.session.query(func.count(RecommendationLog.log_id))\
+        .filter(RecommendationLog.recommended_restaurant_id == rest_id, 
+                RecommendationLog.is_liked == True)\
+        .scalar() or 0
+    return jsonify(serialize_restaurant(rest, like_count=raw_count))
 
 
 @menu_bp.route('/', methods=['POST'])
@@ -417,33 +488,25 @@ def delete_restaurant(rest_id):
 def random_menus():
     count = min(request.args.get('count', 64, type=int), 128)
     cat   = request.args.get('cat', '전체')
-    query = Restaurant.query
-    if cat != '전체':
-        query = query.filter_by(category=cat)
+
     from sqlalchemy import func
+    query = db.session.query(Menu, Category).join(
+        Category, Menu.category_id == Category.id
+    )
+    if cat != '전체':
+        query = query.filter(Category.name == cat)
+
     items = query.order_by(func.random()).limit(count).all()
-    return jsonify({'items': [serialize_restaurant(r) for r in items]}), 200
 
+    result = []
+    for menu, category in items:
+        result.append({
+            'id':       menu.id,
+            'name':     menu.menu_name,
+            'category': category.name,
+        })
 
-@main_bp.route('/api/menu/trending', methods=['GET'])
-def get_trending_data():
-    from sqlalchemy import func as sa_func
-    liked_sub = (
-        db.session.query(
-            RecommendationLog.recommended_restaurant_id,
-            sa_func.count(RecommendationLog.log_id).label('like_count')
-        )
-        .filter(RecommendationLog.is_liked == True)
-        .group_by(RecommendationLog.recommended_restaurant_id)
-        .subquery()
-    )
-    trending = (
-        Restaurant.query
-        .outerjoin(liked_sub, Restaurant.restaurant_id == liked_sub.c.recommended_restaurant_id)
-        .order_by(sa_func.coalesce(liked_sub.c.like_count, 0).desc(), Restaurant.avg_rating.desc())
-        .limit(8).all()
-    )
-    return jsonify({'items': [serialize_restaurant(r) for r in trending]})
+    return jsonify({'items': result}), 200
 
 
 # ══════════════════════════════════════════════════════════════════════════════
