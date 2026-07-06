@@ -254,30 +254,42 @@ export async function getMyFavorites() {
 export async function toggleFavoriteAction({ id, list, setter, type = 'log' }) {
   const previousList = [...list];
 
-  // 1. 낙관적 업데이트: 서버 응답 전 UI를 먼저 변경하여 즉각적인 피드백 제공
+  // 1. 낙관적 업데이트: UI 즉시 반응
   setter((prev) =>
     prev.map((item) => {
-      const targetId = type === 'log' ? item.log_id : item.restaurant?.id ?? item.id;
+      const targetId = type === 'log' ? (item.log_id || item.id) : (item.restaurant?.id ?? item.id);
       return targetId === id ? { ...item, is_liked: !item.is_liked } : item;
     })
   );
 
   try {
-    // 2. 서버 요청: 타입에 따라 적절한 API 엔드포인트 호출
-    const res = type === 'log' 
-      ? await toggleLike(id)           // 기존 log용 API
-      : await toggleFavorite(id);     // 새 식당용 API
+    // 2. 서버 요청: 이제 통합된 toggleFavorite API만 사용
+    const res = await toggleFavorite(id); 
 
-    // 3. 서버 응답으로 최종 상태 확정
+    // 3. 서버 응답 반영 (res.status === 'added' 면 true, 아니면 false)
     setter((prev) =>
       prev.map((item) => {
-        const targetId = type === 'log' ? item.log_id : item.restaurant?.id ?? item.id;
-        return targetId === id ? { ...item, is_liked: res.liked ?? (res.status === 'added') } : item;
+        const targetId = type === 'log' ? (item.log_id || item.id) : (item.restaurant?.id ?? item.id);
+        return targetId === id ? { ...item, is_liked: res.status === 'added' } : item;
       })
     );
   } catch (err) {
     console.error('찜하기 처리 실패:', err);
-    setter(previousList); // 에러 발생 시 원상복구
+    setter(previousList); // 실패 시 원상복구
     alert('찜 상태 변경에 실패했습니다.');
   }
+}
+
+// ── NOTICES ──────────────────────────────────────────────────────────────────
+export async function getNotices() {
+  const { data } = await api.get('/api/notices')
+  return data
+}
+export async function createNotice({ title, content, category }) {
+  const { data } = await api.post('/api/notices', { title, content, category })
+  return data
+}
+export async function deleteNotice(noticeId) {
+  const { data } = await api.delete(`/api/notices/${noticeId}`)
+  return data
 }
