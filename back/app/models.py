@@ -209,6 +209,7 @@ class Review(db.Model):
             'content':       self.content or '',
             'nickname':      self.writer.nickname if self.writer else '알 수 없음',
             'created_at':    self.created_at.strftime('%Y-%m-%d') if self.created_at else '',
+            'restaurant_name': self.restaurant.name if self.restaurant else '',
         }
 class Notice(db.Model):
     """공지사항"""

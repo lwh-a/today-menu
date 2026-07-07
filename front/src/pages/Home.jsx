@@ -138,6 +138,13 @@ export default function Home() {
   const [userLoc, setUserLoc] = useState(null)
   const [locStatus, setLocStatus] = useState('idle')
   const [bannerIdx, setBannerIdx] = useState(0)
+  const [trendKeywords, setTrendKeywords] = useState(() => {
+    try {
+      const saved = localStorage.getItem('trendKeywords')
+      if (saved) return JSON.parse(saved)
+    } catch {}
+    return TREND_FOODS.map(f => ({ name: f, count: 0 }))
+  })
   const [showSearch, setShowSearch] = useState(false)
   const [likedCafeteriaIds, setLikedCafeteriaIds] = useState(() => new Set())
   const bannerTimer = useRef(null)
@@ -159,6 +166,21 @@ useEffect(() => {
       id: String(r.id),
       is_liked: favIds.has(String(r.id))
     })));
+
+    // 실시간 인기 검색어 — 식당 카테고리 카운팅 기반
+    if (rawItems.length > 0) {
+      const countMap = {}
+      rawItems.forEach(r => {
+        if (r.category) countMap[r.category] = (countMap[r.category] || 0) + 1
+        if (r.name) countMap[r.name] = (countMap[r.name] || 0) + 1
+      })
+      const sorted = Object.entries(countMap)
+        .sort((a, b) => b[1] - a[1] || Math.random() - 0.5)
+        .slice(0, 8)
+        .map(([name, count]) => ({ name, count }))
+      setTrendKeywords(sorted)
+      try { localStorage.setItem('trendKeywords', JSON.stringify(sorted)) } catch {}
+    }
   }).catch((err) => {
     console.error('trending 로드 실패:', err);
     setTrending(SAMPLE_RESTAURANTS);
@@ -187,6 +209,15 @@ useEffect(() => {
   }
 
   const visibleRestaurants = trending.length ? trending : SAMPLE_RESTAURANTS
+
+  const handleKeywordClick = (keyword) => {
+    setTrendKeywords(prev => {
+      const updated = prev.map(k => k.name === keyword ? { ...k, count: k.count + 1 } : k)
+      const sorted = [...updated].sort((a, b) => b.count - a.count || Math.random() - 0.5)
+      try { localStorage.setItem('trendKeywords', JSON.stringify(sorted)) } catch {}
+      return sorted
+    })
+  }
 
   const handleCafeteriaLike = (r) => {
     const isLiked = Boolean(r.is_liked) || likedCafeteriaIds.has(r.id)
@@ -232,14 +263,6 @@ useEffect(() => {
               src="https://images.unsplash.com/photo-1621996346565-e3dbc646d9a9?auto=format&fit=crop&w=900&q=80"
               alt="파스타"
             />
-            <div className={bannerDotsClass}>
-              {[0, 1, 2].map((dot) => (
-                <span
-                  key={dot}
-                  className={`${bannerDotClass} ${bannerIdx === dot ? bannerDotActiveClass : ''}`}
-                />
-              ))}
-            </div>
           </div>
 
           <div className={`${slideBaseClass} ${slideBackgrounds[1]} ${bannerIdx === 1 ? slideActiveClass : ''}`}>
@@ -280,15 +303,42 @@ useEffect(() => {
               alt="피자"
             />
           </div>
+          {/* 좌우 버튼 — 항상 표시 */}
+          <button
+            onClick={() => { setBannerIdx((i) => (i + 2) % 3); clearInterval(bannerTimer.current); bannerTimer.current = setInterval(() => setBannerIdx((i) => (i + 1) % 3), 4500) }}
+            style={{ position:'absolute', left:12, top:'50%', transform:'translateY(-50%)', zIndex:10, background:'rgba(0,0,0,0.35)', border:'none', borderRadius:'50%', width:36, height:36, cursor:'pointer', color:'#fff', fontSize:'1.2rem', display:'flex', alignItems:'center', justifyContent:'center' }}
+            aria-label="이전 슬라이드"
+          >‹</button>
+          <button
+            onClick={() => { setBannerIdx((i) => (i + 1) % 3); clearInterval(bannerTimer.current); bannerTimer.current = setInterval(() => setBannerIdx((i) => (i + 1) % 3), 4500) }}
+            style={{ position:'absolute', right:12, top:'50%', transform:'translateY(-50%)', zIndex:10, background:'rgba(0,0,0,0.35)', border:'none', borderRadius:'50%', width:36, height:36, cursor:'pointer', color:'#fff', fontSize:'1.2rem', display:'flex', alignItems:'center', justifyContent:'center' }}
+            aria-label="다음 슬라이드"
+          >›</button>
+          {/* 클릭 가능한 dots — 항상 표시 */}
+          <div className={bannerDotsClass}>
+            {[0, 1, 2].map((dot) => (
+              <span
+                key={dot}
+                onClick={() => { setBannerIdx(dot); clearInterval(bannerTimer.current); bannerTimer.current = setInterval(() => setBannerIdx((i) => (i + 1) % 3), 4500) }}
+                className={`${bannerDotClass} ${bannerIdx === dot ? bannerDotActiveClass : ''}`}
+                style={{ cursor:'pointer' }}
+              />
+            ))}
+          </div>
         </div>
 
         <aside className={trendCardClass}>
           <h4 className={trendTitleClass}>🔥 실시간 인기 검색어</h4>
           <div className={trendListClass}>
-            {TREND_FOODS.map((food, i) => (
-              <Link to={`/menu?q=${food}`} className={trendItemClass} key={food}>
+            {trendKeywords.map((item, i) => (
+              <Link
+                to={`/menu?q=${item.name}`}
+                className={trendItemClass}
+                key={item.name}
+                onClick={() => handleKeywordClick(item.name)}
+              >
                 <span className={trendRankClass}>{i + 1}</span>
-                <span className={trendNameClass}>{food}</span>
+                <span className={trendNameClass}>{item.name}</span>
                 <span className={trendUpClass}>↑</span>
               </Link>
             ))}

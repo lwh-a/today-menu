@@ -110,20 +110,22 @@ export default function PartyNotification() {
   return (
     <div style={{ position: 'relative' }}>
       {/* 알림 벨 버튼 */}
-      <button onClick={()=>setShow(!show)} className={`${headerIconLink} group mr-1 max-md:hidden`}>
-        <img src="/img/icon/alarm.png" className="h-[28px] w-[28px] object-contain" alt="alarm" onError={(e) => { e.target.style.display="none" }} />
-                <span className="whitespace-nowrap text-[0.65rem] font-extrabold leading-none text-[#7D6A63] transition-colors group-hover:text-[var(--color-primary)]">
-                알림
-                </span>
-        {unreadCount > 0 && (
-          <span style={{
-            position: 'absolute', top: 0, right: 0,
-            background: 'var(--color-danger)', color: '#fff',
-            borderRadius: '50%', width: 16, height: 16,
-            fontSize: '.65rem', fontWeight: 900,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>{unreadCount > 9 ? '9+' : unreadCount}</span>
-        )}
+<button onClick={() => setShow(!show)} className={`${headerIconLink} group mr-1 max-md:hidden`}>
+        <div style={{ position: 'relative' }}>
+          <img src="/img/icon/alarm.png" className="h-[28px] w-[28px] object-contain" alt="alarm" onError={(e) => { e.target.style.display="none" }} />
+          {unreadCount > 0 && (
+            <span style={{
+              position: 'absolute', top: 0, right: 0,
+              background: 'var(--color-danger)', color: '#fff',
+              borderRadius: '50%', width: 16, height: 16,
+              fontSize: '.65rem', fontWeight: 900,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>{unreadCount > 9 ? '9+' : unreadCount}</span>
+          )}
+        </div>
+        <span className="whitespace-nowrap text-[0.65rem] font-extrabold leading-none text-[#7D6A63] transition-colors group-hover:text-[var(--color-primary)]">
+          파티알림
+        </span>
       </button>
 
       {/* 알림 드롭다운 */}
@@ -138,7 +140,7 @@ export default function PartyNotification() {
             width: 320, maxHeight: 400, overflowY: 'auto', zIndex: 99,
           }}>
             <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontWeight: 900, fontSize: '.92rem' }}>🔔 파티 알림</span>
+              <span style={{ fontWeight: 900, fontSize: '.92rem', display: 'flex', alignItems: 'center', gap: 6 }}><img src="/img/icon/alarm.png" alt="알림" style={{ width: 16, height: 16 }} />파티 알림</span>
               {notifications.length > 0 && (
                 <button onClick={() => setNotifications([])}
                   style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '.78rem', color: 'var(--text-muted)', fontWeight: 700 }}>
