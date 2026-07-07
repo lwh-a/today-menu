@@ -1105,6 +1105,27 @@ def admin_delete_review(review_id):
 
 
 # ── OpenAI 챗봇 ───────────────────────────────────────────────────────────────
+def _address_to_coord(address):
+    """카카오 로컬 API로 주소 → 좌표 변환"""
+    import requests as _req
+    kakao_key = os.environ.get('KAKAO_REST_API_KEY', '')
+    if not kakao_key or not address or address == '없음':
+        return None, None
+    try:
+        res = _req.get(
+            'https://dapi.kakao.com/v2/local/search/address.json',
+            headers={'Authorization': f'KakaoAK {kakao_key}'},
+            params={'query': address},
+            timeout=3
+        )
+        docs = res.json().get('documents', [])
+        if docs:
+            return float(docs[0]['y']), float(docs[0]['x'])  # lat, lng
+    except Exception:
+        pass
+    return None, None
+
+
 def _build_user_context(user_id):
     user = User.query.get_or_404(user_id)
     user_prefs = user.preferences or {}
@@ -1172,9 +1193,18 @@ def chatbot():
             loc_name = chosen['name']
 
     nearby_list = []
-    if lat and lng:
 
-        lat_buffer = 0.0091 # 대략 1km 마진
+    # 위치 없으면 사용자 주소지 → 좌표 변환 fallback
+    addr_fallback_used = False
+    if not (lat and lng) and user.address and user.address != '없음':
+        addr_lat, addr_lng = _address_to_coord(user.address)
+        if addr_lat and addr_lng:
+            lat, lng = addr_lat, addr_lng
+            loc_name = f"{user.address} (주소지 기반)"
+            addr_fallback_used = True
+
+    if lat and lng:
+        lat_buffer = 0.0091  # 대략 1km 마진
         lng_buffer = 0.0113
         filtered_for_chat = Restaurant.query.filter(
             Restaurant.latitude.between(lat - lat_buffer, lat + lat_buffer),
@@ -1200,11 +1230,15 @@ def chatbot():
     all_rests_str = ', '.join(all_rests) or '등록된 식당 없음'
 
     if mode == 'recommend':
-        location_section = (
-            f"- 현재 위치 반경 1km 식당: {nearby_str}"
-            if nearby_str
-            else f"- 전체 등록 식당: {all_rests_str}"
-        )
+        if nearby_str:
+            if addr_fallback_used:
+                location_section = f"- 주소지({user.address}) 기반 반경 1km 식당: {nearby_str}"
+            else:
+                location_section = f"- 현재 위치 반경 1km 식당: {nearby_str}"
+        else:
+            location_section = f"- 전체 등록 식당: {all_rests_str}"
+            if user.address and user.address != '없음':
+                location_section += f"\n- 참고 주소지: {user.address} (좌표 변환 실패로 전체 식당 기준 추천)"
         system_prompt = f"""당신은 '오늘의 메뉴' 앱의 AI 메뉴 추천 챗봇입니다.
 아래 사용자 DB 정보를 기반으로 메뉴 또는 식당을 추천해주세요.
 
