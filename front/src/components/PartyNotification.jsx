@@ -115,7 +115,7 @@ export default function PartyNotification() {
           position: 'relative', padding: '4px', fontSize: '1.2rem',
         }}
       >
-        🔔
+        <img src="/img/icon/alarm.png" alt="알림" style={{ width: 22, height: 22, display: 'block' }} />
         {unreadCount > 0 && (
           <span style={{
             position: 'absolute', top: 0, right: 0,
@@ -139,7 +139,7 @@ export default function PartyNotification() {
             width: 320, maxHeight: 400, overflowY: 'auto', zIndex: 99,
           }}>
             <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontWeight: 900, fontSize: '.92rem' }}>🔔 파티 알림</span>
+              <span style={{ fontWeight: 900, fontSize: '.92rem', display: 'flex', alignItems: 'center', gap: 6 }}><img src="/img/icon/alarm.png" alt="알림" style={{ width: 16, height: 16 }} />파티 알림</span>
               {notifications.length > 0 && (
                 <button onClick={() => setNotifications([])}
                   style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '.78rem', color: 'var(--text-muted)', fontWeight: 700 }}>
