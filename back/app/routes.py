@@ -832,7 +832,6 @@ def mypage():
         'user':       serialize_user(user),
         'my_parties': [serialize_party(p, user_id) for p in my_parties],
         'my_reviews': [rv.to_dict() for rv in my_reviews],
-        'my_reviews': [rv.to_dict() for rv in my_reviews],
         'rec_logs': [
             {
                 'log_id':     r.log_id,
