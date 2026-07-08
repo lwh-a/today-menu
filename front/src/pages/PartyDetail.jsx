@@ -572,7 +572,7 @@ export default function PartyDetail() {
               </div>
 
               {/* 호스트 전용: 파티 종료 */}
-              {party.is_host && party.status === 'CLOSED' && (
+              {isHost && party.status === 'CLOSED' && (
                 <button
                   onClick={async () => {
                     if (!window.confirm('파티를 종료하시겠습니까?')) return
@@ -594,7 +594,7 @@ export default function PartyDetail() {
               )}
 
               {/* 호스트 전용: 파티 취소 */}
-              {party.is_host && party.status !== 'COMPLETED' && (
+              {isHost && party.status !== 'COMPLETED' && (
                 <button
                   onClick={handleCancelParty}
                   className="w-full rounded-[8px] bg-[var(--color-primary)] mb-3 px-4 py-3 font-black text-white transition hover:bg-[var(--color-primary-dark)]"
@@ -604,7 +604,7 @@ export default function PartyDetail() {
               )}
 
               {/* 1. 호스트 전용: 모집 중일 때 마감 버튼 */}
-              {party.is_host && isRecruiting && (
+              {isHost && isRecruiting && (
                 <button
                   onClick={handleStatusChange.bind(null, 'CLOSED')}
                   className="w-full rounded-[8px] border border-[var(--border-color)] bg-[var(--bg-surface)] px-4 py-3 font-black text-[var(--text-secondary)] transition hover:bg-[var(--bg-surface-2)]"
@@ -625,8 +625,10 @@ export default function PartyDetail() {
                     </Link>
                   ) : isMember ? (
                     <div className="flex flex-col gap-2">
-                      <button className="btn btn-secondary btn-block" disabled>✅ 참여 중</button>
-                      {!isRecruiting && (
+                      <button className="btn btn-secondary btn-block" disabled>
+                        ✅ {party.status === 'RECRUITING' ? '모집중 참여' : party.status === 'CLOSED' ? '마감 참여중' : '파티 완료'}
+                      </button>
+                      {(party.status === 'CLOSED' || party.status === 'COMPLETED') && (
                         <button className="btn btn-info btn-block" onClick={() => setActiveTab('chat')}>
                           💬 채팅방 입장
                         </button>
@@ -685,7 +687,7 @@ export default function PartyDetail() {
 
 
                   {/* 호스트가 타인 강퇴 */}
-                  {user && party.is_host && !m.is_host && (
+                  {user && isHost && !m.is_host && (
                     <button
                       onClick={() => {
                         if (window.confirm(`${m.user?.nickname}님을 정말로 강퇴하시겠습니까?`)) {
@@ -732,7 +734,7 @@ export default function PartyDetail() {
                   )}
 
                   {/* 호스트 본인 행 — 파티 중단(취소) 버튼 */}
-                  {user && party.is_host && m.user?.user_id === user.user_id && party.status !== 'COMPLETED' && (
+                  {user && isHost && m.user?.user_id === user.user_id && party.status !== 'COMPLETED' && (
                     <button
                       onClick={() => {
                         // 파티원(본인 포함)이 1명 초과일 때(즉, 다른 사람이 있을 때) 경고
