@@ -149,4 +149,7 @@ export default function MannerHistory() {
       </div>
     </>
   )
+
 }
+
+
