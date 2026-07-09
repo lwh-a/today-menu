@@ -152,7 +152,9 @@
 | ![파티 목록](./docs/screenshots/party.jpeg) | ![파티 상세](./docs/screenshots/party_detail.jpeg) |
 
 ### AI 챗봇
-![챗봇](./docs/screenshots/chatbot.png)
+| 메뉴 추천 | Q & A |
+|---|---|
+| ![챗봇](./docs/screenshots/chatbot1.png) | !![챗봇](./docs/screenshots/chatbot2.png) |
 
 ### 마이페이지
 | 마이페이지 | 매너온도 상세 |
