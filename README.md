@@ -87,6 +87,7 @@
 | 스무고개 | 예/아니오 질문으로 AI가 메뉴 맞추기 |
 | 월드컵 | 32개 메뉴 토너먼트 1:1 대결 |
 | 뽑기 | 긁어서 메뉴 확인 |
+| 사다리 | 사다리 타고 메뉴확인 |
 
 ---
 
@@ -96,8 +97,8 @@
 - 찜 목록 / 활동 내역 / 파티 참여 기록
 - **내가 쓴 리뷰** 목록
 - 매너온도 상세 내역 확인
-- 저장 장소 최대 3개 관리 (집·직장 등)
-
+- 나의 맛집 장소 최대 3개 관리
+  
 ---
 
 ### 이메일 / 비밀번호 찾기
@@ -156,16 +157,20 @@
 ### 마이페이지
 | 마이페이지 | 매너온도 상세 |
 |---|---|
-| ![마이페이지](./docs/screenshots/mypage.jpeg) | ![매너온도](./docs/screenshots/manner.jpeg) |
+| ![마이페이지](./docs/screenshots/mypage.jpeg) | ![프로필수정](./docs/screenshots/mypageedit.jpeg) |
 
 ### 게임
 | 룰렛 | 월드컵 |
 |---|---|
 | ![룰렛](./docs/screenshots/game_roulette.jpeg) | ![월드컵](./docs/screenshots/game_worldcup.jpeg) |
 
-| 스무고개 | 뽑기 |
+| 스무고개 | 뽑기 | 
 |---|---|
 | ![스무고개](./docs/screenshots/game_twentyq.jpeg) | ![뽑기](./docs/screenshots/game_scratch.jpeg) |
+
+| 사다리 | 
+|---|
+| ![사다리](./docs/screenshots/game_sd.jpeg) |
 
 ### 고객센터 / 관리자
 | 고객센터 | 관리자 |
