@@ -168,13 +168,15 @@ export default function MyPage() {
 
   // ── 회원 탈퇴 ────────────────────────────────────────────────────────────
   const handleWithdraw = async () => {
-    if (!window.confirm('정말로 회원 탈퇴를 하시겠습니까?')) return
+    if (!window.confirm('정말로 회원 탈퇴를 하시겠습니까?\n탈퇴 후 모든 데이터가 삭제됩니다.')) return
     try {
+      const apiMod2 = (await import('../api/axiosInstance')).default
+      await apiMod2.delete('/api/auth/me')
       ctxLogout()
       alert('회원 탈퇴가 완료되었습니다.')
       navigate('/')
-    } catch {
-      alert('탈퇴 처리 중 오류가 발생했습니다.')
+    } catch (e) {
+      alert(e?.response?.data?.message || '탈퇴 처리 중 오류가 발생했습니다.')
     }
   }
 
