@@ -38,10 +38,7 @@ export default function MyPageEdit() {
   useEffect(() => {
     getMyPage()
       .then((d) => {
-        // 백엔드 User 모델의 preferences { likes: [], dislikes: [] } 구조에 맞춤
-        const userPrefs = d.user?.preferences || {}
         setForm({
-
           nickname: d.user.nickname ?? '',
           allergies: d.user.allergies ?? '',
           gender: d.user.gender ?? '미설정',
@@ -53,7 +50,7 @@ export default function MyPageEdit() {
           securityAnswer: '',
         })
       })
-      .catch((err) => { console.error('유저 데이터 로드 실패:', err) })
+      .catch(() => { })
       .finally(() => setDataLoading(false))
   }, [])
 
@@ -74,7 +71,11 @@ export default function MyPageEdit() {
       new window.daum.Postcode({
         oncomplete: (data) => {
           const address = data.roadAddress || data.jibunAddress
-          setForm((f) => ({ ...f, address }))
+
+          setForm((f) => ({
+            ...f,
+            address,
+          }))
         },
       }).open()
     }
@@ -85,8 +86,10 @@ export default function MyPageEdit() {
     }
 
     const script = document.createElement('script')
-    script.src = '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'
+    script.src =
+      '//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js'
     script.onload = openPostcode
+
     document.head.appendChild(script)
   }
 
@@ -143,7 +146,7 @@ export default function MyPageEdit() {
   const handleCheckPassword = async () => {
     setError('')
     setIsPasswordValidated(false)
-    
+
     const {
       currentPassword,
       newPassword,
@@ -203,7 +206,7 @@ export default function MyPageEdit() {
         )
       }
       const updated = await updateMyPageProfile(payload)
-      
+
       if (updated && updated.user) {
         login(updated.user)
       } else {
@@ -214,7 +217,7 @@ export default function MyPageEdit() {
       navigate('/mypage')
     } catch (err) {
       setError(err.response?.data?.message ?? '저장에 실패했습니다.')
-    } finally { // 🔥 오타 수정: 'military'를 문법에 맞는 'finally'로 교체 완료!
+    } finally {
       setLoading(false)
     }
   }
@@ -226,7 +229,6 @@ export default function MyPageEdit() {
   )
 
   return (
-
     <div className="mx-auto flex w-full max-w-[1110px] justify-center px-4 py-6 sm:px-6 lg:px-8">
       <div className="w-full rounded-[28px] border border-[var(--border-color)] bg-white p-5 shadow-[0_18px_45px_rgba(42,29,26,0.10)] sm:p-8 lg:p-10">
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -264,42 +266,14 @@ export default function MyPageEdit() {
                 alt="캐릭터2"
                 className="self-end block max-h-[140px] w-full translate-y-6 object-contain"
               />
-
-    <div className="max-w-[600px] w-full mx-auto">
-      <Link to="/mypage" className="mt-5 inline-flex items-center transition hover:scale-105 cursor-pointer">
-        <img src="/img/icon/arrow_left.png" alt="마이페이지" className="h-10 w-10" />
-      </Link>
-
-      <div className="text-center mb-7">
-        <h2 className="inline-flex items-center justify-center gap-2 text-[2rem] font-extrabold text-[var(--text-primary)] mb-2">
-          <img src="/img/icon/edit.png" alt="프로필 수정" className="w-8 h-8 object-contain" />
-          <span>프로필 수정</span>
-        </h2>
-        <p className="text-[0.92rem] text-[var(--text-muted)]">
-          회원 정보를 수정하고 나만의 취향을 관리해보세요.
-        </p>
-      </div>
-
-      <div className="bg-[var(--bg-white)] border border-[var(--border-color)] rounded-[var(--border-radius-xl)] p-8">
-        <form onSubmit={handleSubmit}>
-          {/* 닉네임 */}
-          <div className="form-group">
-            <label className="form-label">닉네임</label>
-            <input type="text" className="form-control" required
-              value={form.nickname} onChange={(e) => setForm({ ...form, nickname: e.target.value })} />
-          </div>
-
-
             </div>
           </div>
-
 
           <section className="rounded-[22px] border border-[var(--border-color)] bg-[#fffdf9] p-5 sm:p-6">
             <div className="mb-5 flex items-center justify-between gap-3">
               <div>
                 <h3 className="text-lg font-extrabold text-[var(--text-primary)]">기본 정보</h3>
               </div>
-
             </div>
 
             <div className="grid gap-5 lg:grid-cols-2">
@@ -316,16 +290,37 @@ export default function MyPageEdit() {
                   />
                 </div>
 
-                {/* 주소지 */}
+                {/* 주소지 (디자인이 변경된 main의 카카오 검색 방식 유지) */}
                 <div>
-                  <label className="mb-2 block text-sm font-bold text-[var(--text-secondary)]">주소지</label>
-                  <input
-                    type="text"
-                    className="h-12 w-full rounded-2xl border border-[var(--border-color)] bg-white px-4 text-[0.95rem] outline-none transition placeholder:text-[var(--text-light)] focus:border-[var(--color-primary)] focus:shadow-[0_0_0_3px_rgba(244,108,111,0.16)]"
-                    placeholder="예: 서울시 강남구"
-                    value={form.address}
-                    onChange={(e) => setForm({ ...form, address: e.target.value })}
-                  />
+                  <label className="mb-2 block text-sm font-bold text-[var(--text-secondary)]">
+                    주소지
+                  </label>
+
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      className="h-12 flex-1 rounded-2xl border border-[var(--border-color)] bg-white px-4 text-[0.95rem] outline-none transition"
+                      placeholder="주소 검색 버튼을 눌러주세요"
+                      value={form.address}
+                      readOnly
+                      onClick={handleAddressSearch}
+                      style={{ cursor: 'pointer' }}
+                    />
+
+                    <button
+                      type="button"
+                      onClick={handleAddressSearch}
+                      className="h-12 flex-shrink-0 rounded-2xl border border-[#FAD0D1] bg-[#FEEDEC] px-5 text-sm font-extrabold text-[var(--color-primary)] transition hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white"
+                    >
+                      🔍 주소 검색
+                    </button>
+                  </div>
+
+                  {form.address && (
+                    <div className="mt-2 text-sm text-[var(--text-muted)]">
+                      📍 {form.address}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -372,16 +367,14 @@ export default function MyPageEdit() {
             {/* 좋아하는 음식 */}
             <div className="rounded-[22px] border border-[var(--border-color)] bg-[#fffdf9] p-5 sm:p-6">
               <label className="mb-3 flex items-center gap-2 text-[.95rem] font-bold text-[#1890ff]">
-                
-              <span className="grid h-10 w-10 place-items-center rounded-full bg-[#EBF5FF]">
-                <img
-                  src="/img/icon/thumb-up.png"
-                  alt="좋아하는 음식"
-                  className="h-5 w-5 object-contain"
-                />
-              </span>
-              <span>좋아하는 음식</span>
-
+                <span className="grid h-10 w-10 place-items-center rounded-full bg-[#EBF5FF]">
+                  <img
+                    src="/img/icon/thumb-up.png"
+                    alt="좋아하는 음식"
+                    className="h-5 w-5 object-contain"
+                  />
+                </span>
+                <span>좋아하는 음식</span>
               </label>
               <div className="mb-4 flex flex-wrap gap-2">
                 {PREF_FOODS.map((food) => (
@@ -436,14 +429,14 @@ export default function MyPageEdit() {
             <div className="rounded-[22px] border border-[var(--border-color)] bg-[#fffdf9] p-5 sm:p-6">
               <label className="mb-3 flex items-center gap-2 text-[.95rem] font-bold text-[#FF4D4F]">
                 <span className="grid h-10 w-10 place-items-center rounded-full bg-[#FFF3F0]">
-              <img
-                src="/img/icon/thumbs-down.png"
-                alt="기피하는 음식"
-                className="h-5 w-5 object-contain"
-              />
-            </span>
-            <span>기피하는 음식</span>
-            </label>
+                  <img
+                    src="/img/icon/thumbs-down.png"
+                    alt="기피하는 음식"
+                    className="h-5 w-5 object-contain"
+                  />
+                </span>
+                <span>기피하는 음식</span>
+              </label>
               <div className="mb-4 flex flex-wrap gap-2">
                 {DISLIKE_FOODS.map((food) => (
                   <button
