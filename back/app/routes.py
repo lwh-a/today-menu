@@ -2283,17 +2283,22 @@ def create_inquiry():
 @support_bp.route('/inquiries/<int:id>/answer', methods=['PATCH'])
 @admin_required
 def answer_inquiry(id):
-    print("PATCH 들어옴:", id)
+    # 관리자 권한 체크
+    from flask_jwt_extended import get_jwt_identity
+    user_id  = int(get_jwt_identity())
+    cur_user = User.query.get(user_id)
+    if not cur_user or cur_user.role.value.lower() != 'admin':
+        return jsonify({'message': '관리자만 답변할 수 있습니다.'}), 403
 
     inquiry = Inquiry.query.get(id)
-    print("조회 결과:", inquiry)
-
     if inquiry is None:
-        return jsonify({"msg": "문의가 없습니다."}), 404
+        return jsonify({'msg': '문의가 없습니다.'}), 404
 
-    inquiry.answer = request.json['answer']
+    data = request.get_json(force=True)
+    inquiry.answer = data.get('answer', '')
+    from datetime import datetime
+    inquiry.answered_at = datetime.utcnow()
     db.session.commit()
-
     return jsonify(inquiry.to_dict()), 200
 
 # ── SAVED-LOCATIONS API ──────────────────────────────────────────────────────
