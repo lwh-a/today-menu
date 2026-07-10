@@ -215,21 +215,23 @@ today-menu/
 ├── front/
 │   ├── index.html                     ← Vite 진입점
 │   ├── vite.config.js                 ← 프록시 (Flask :5000 자동 연결)
-│   ├── package.json                   ← React 19 + Tailwind v4 + Axios + SocketIO
+│   ├── package.json                   ← React 19 + Tailwind v4 + Axios + SocketIO + Capacitor
 │   ├── postcss.config.js
 │   ├── vercel.json                    ← Vercel 배포 설정
+│   ├── capacitor.config.json          ← Capacitor (PWA/WebView) 설정
 │   ├── .env                           ← VITE_API_URL (배포용)
+│   ├── .env.production                ← 프로덕션 환경변수
 │   └── src/
 │       ├── main.jsx
 │       ├── App.jsx                    ← 라우터 + AuthContext + PrivateRoute + useAuth
 │       ├── index.css                  ← Tailwind + 커스텀 컴포넌트
-│       ├── utils.js                   ← 공통 유틸 (processTags 등)
+│       ├── utils.js                   ← 공통 유틸
 │       ├── api/
 │       │   ├── axiosInstance.js       ← JWT 인터셉터 (401 → refresh 자동)
 │       │   └── services.js            ← API 엔드포인트 함수 모음
 │       ├── components/
 │       │   ├── Header.jsx             ← 헤더 (네비게이션 + 파티 알림 벨)
-│       │   ├── Footer.jsx             ← 푸터 (이용안내 + 패밀리사이트)
+│       │   ├── Footer.jsx             ← 푸터
 │       │   ├── ChatBot.jsx            ← AI 챗봇 FAB (추천/Q&A + ACTION_LINKS)
 │       │   ├── KakaoMap.jsx           ← 카카오맵 지도
 │       │   ├── Cafeteria.jsx          ← 식당 카드 (홈 트렌딩)
@@ -241,23 +243,23 @@ today-menu/
 │       │   ├── PartyNotification.jsx  ← 파티 알림 (10분/5분 전 + 참여자 알림)
 │       │   └── ScrollToTop.jsx        ← 페이지 이동 시 스크롤 상단 이동
 │       ├── pages/
-│       │   ├── Home.jsx               ← 홈 (슬라이더+AI챗봇 연동 + 실시간 인기검색어)
+│       │   ├── Home.jsx               ← 홈 (슬라이더+AI챗봇연동+실시간인기검색어+내주변)
 │       │   ├── Login.jsx              ← 로그인 (이메일/카카오/네이버)
-│       │   ├── FindPassword.jsx       ← 비밀번호 찾기 (이메일+닉네임 인증)
-│       │   ├── FindId.jsx             ← 이메일 찾기 (닉네임+보안질문 인증)
+│       │   ├── FindPassword.jsx       ← 비밀번호 찾기
+│       │   ├── FindId.jsx             ← 이메일 찾기 (보안질문 인증)
 │       │   ├── Register.jsx           ← 회원가입 (약관 동의 포함)
 │       │   ├── NaverCallback.jsx      ← 네이버 소셜 로그인 콜백
-│       │   ├── Menu.jsx               ← 메뉴 목록 (카테고리 필터 + 검색 + 페이지네이션)
-│       │   ├── MenuDetail.jsx         ← 메뉴 상세 (영업시간 + 카카오맵 + 리뷰)
-│       │   ├── Party.jsx              ← 파티 목록 (검색 + 상태 탭)
-│       │   ├── PartyCreate.jsx        ← 파티 생성 (식당 자동 선택)
+│       │   ├── Menu.jsx               ← 메뉴 목록 (카테고리 필터+검색+페이지네이션)
+│       │   ├── MenuDetail.jsx         ← 메뉴 상세 (영업시간+카카오맵+리뷰)
+│       │   ├── Party.jsx              ← 파티 목록 (검색+상태 탭)
+│       │   ├── PartyCreate.jsx        ← 파티 생성
 │       │   ├── PartyDetail.jsx        ← 파티 상세 + 실시간 채팅 (Socket.IO)
 │       │   ├── MyPage.jsx             ← 마이페이지 (프로필+찜+리뷰+활동내역+탈퇴)
 │       │   ├── MyPageEdit.jsx         ← 프로필 편집
-│       │   ├── MannerHistory.jsx      ← 매너온도 상세 내역 (stats 포함)
+│       │   ├── MannerHistory.jsx      ← 매너온도 상세 (stats 포함)
 │       │   ├── Game.jsx               ← 게임 (룰렛/스무고개/월드컵/뽑기/사다리)
-│       │   ├── Notice.jsx             ← 공지사항 (DB 우선, fallback 기본공지)
-│       │   ├── Support.jsx            ← 고객센터 (FAQ + 1:1 문의, useAuth 연동)
+│       │   ├── Notice.jsx             ← 공지사항 (DB 우선)
+│       │   ├── Support.jsx            ← 고객센터 (FAQ+1:1문의, useAuth)
 │       │   ├── AdminPage.jsx          ← 관리자 (유저/식당/문의/공지/신고/리뷰 6탭)
 │       │   ├── Company.jsx            ← 회사 소개
 │       │   ├── ChatModal.jsx          ← 파티 채팅 모달
@@ -265,23 +267,26 @@ today-menu/
 │       │   ├── Terms2.jsx             ← 개인정보처리방침
 │       │   └── NotFound.jsx           ← 404 페이지
 │       └── data/
-│           ├── termsContent.js        ← 이용약관 내용
-│           └── privacyContent.js      ← 개인정보처리방침 내용
+│           ├── termsContent.js
+│           └── privacyContent.js
 └── back/
     ├── .env                           ← DATABASE_URL, SECRET_KEY, OPENAI_API_KEY 등
-    ├── run.py                         ← Flask 서버 실행 진입점
-    ├── seed.py                        ← DB 초기화 + 시드 데이터 (menus/categories)
-    ├── main.py                        ← 앱 팩토리 호출
-    ├── config.py                      ← DB 연결 + psycopg prepare_threshold 설정
+    ├── run.py
+    ├── seed.py                        ← DB 초기화 + 시드 데이터
+    ├── main.py
+    ├── config.py                      ← DB 연결 + psycopg prepare_threshold
     ├── requirements.txt
     ├── render.yaml                    ← Render 배포 설정
-    ├── instance/                      ← SQLite (로컬 개발용)
+    ├── install.bat                    ← 로컬 설치 스크립트
+    ├── setup.bat                      ← 로컬 실행 스크립트
+    ├── instance/
+    ├── migrations/
     └── app/
-        ├── __init__.py                ← CORS + SocketIO + JWT + APScheduler 초기화
-        ├── models.py                  ← DB 모델 (14개 테이블)
-        ├── routes.py                  ← 전체 REST API (77개 함수)
-        ├── constants.py               ← 카테고리 등 상수 정의
-        └── utils.py                   ← 공통 유틸 함수
+        ├── __init__.py                ← CORS + SocketIO + JWT + APScheduler
+        ├── models.py                  ← DB 모델 (16개 테이블)
+        ├── routes.py                  ← REST API (84개 함수)
+        ├── constants.py
+        └── utils.py
 ```
 
 ---
@@ -304,6 +309,8 @@ today-menu/
 | `notices` | 공지사항 |
 | `categories` | 게임 메뉴 카테고리 |
 | `menus` | 게임용 메뉴 목록 |
+| `searchlog` | 실시간 검색어 로그 (keyword, created_at) |
+| `savedlocation` | 저장 장소 (user_id, name, address) |
 
 ---
 
