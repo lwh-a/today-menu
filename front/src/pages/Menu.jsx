@@ -132,7 +132,7 @@ export default function Menu() {
       </section>
 
       {/* 카테고리 필터 */}
-      <div className="mt-8 mb-13 flex flex-wrap items-center gap-5">
+      <div className="mt-8 mb-10 flex flex-wrap items-center gap-5">
         <span className="shrink-0 text-[0.85rem] font-bold">카테고리</span>
         <div className="flex flex-wrap gap-3">
           {CATEGORIES.map((c) => (
@@ -179,7 +179,7 @@ export default function Menu() {
           </form>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="mt-6 flex items-center gap-4">
           <span className="text-[0.85rem] text-[var(--text-muted)]">
             총 {pagination.total.toLocaleString()}개
           </span>

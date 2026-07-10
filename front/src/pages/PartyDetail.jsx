@@ -479,7 +479,7 @@ export default function PartyDetail() {
             {activeTab === 'chat' && isMember && (
               <div className="rounded-[10px] border border-[#FFC8C4] bg-white p-8">
                 <h3 className="mb-4 flex items-center gap-2 text-xl font-black text-[#221517]">
-                  <img src="/img/icon/logo.png" alt="오늘 뭐먹지?" className="h-6 w-6 object-contain"
+                  <img src="/img/icon/logo.png" alt="오늘 뭐먹지?" className="h-7 w-8 object-contain"
                     onError={(e) => { e.target.style.display = 'none' }} />
                   파티 채팅
                 </h3>
@@ -561,7 +561,7 @@ export default function PartyDetail() {
                 <div className="mb-4 flex items-center justify-between">
                   <h3 className="flex items-center gap-2 text-xl font-black text-[#221517]">
                     <span className="text-2xl">
-                      
+                      <img className='mr-1' src='/img/icon/edit.png' />
                     </span>
                     리뷰
                   </h3>
