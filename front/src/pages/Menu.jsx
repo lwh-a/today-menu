@@ -16,23 +16,10 @@ const CAT_ICON = {
   카페: './img/category/coffee.webp',
   술집: './img/category/beer.webp'
 }
-const CATEGORIES = [
-  '전체',
-  '한식',
-  '일식',
-  '중식',
-  '양식',
-  '분식',
-  '치킨',
-  '카페',
-  '술집',
-]
-const adBannerClass =
-  'w-full overflow-hidden rounded-[12px] bg-white max-md:h-[70px]'
-const categoryButtonBaseClass =
-  'flex cursor-pointer items-center justify-center gap-0 whitespace-nowrap rounded-full bg-[var(--bg-white)] px-3 py-2 text-[0.85rem] font-bold text-black shadow-sm transition-all duration-150 hover:scale-105 hover:bg-[var(--color-secondary)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)]'
-const categoryButtonActiveClass =
-  'scale-105 bg-[var(--color-secondary)] shadow-[0_4px_12px_rgba(0,0,0,0.12)]'
+const CATEGORIES = ['전체','한식','일식','중식','양식','분식','치킨','카페','술집']
+const adBannerClass = 'w-full overflow-hidden rounded-[12px] bg-white max-md:h-[70px]'
+const categoryButtonBaseClass = 'flex cursor-pointer items-center justify-center gap-0 whitespace-nowrap rounded-full bg-[var(--bg-white)] px-3 py-2 text-[0.85rem] font-bold text-black shadow-sm transition-all duration-150 hover:scale-105 hover:bg-[var(--color-secondary)] hover:shadow-[0_4px_12px_rgba(0,0,0,0.12)]'
+const categoryButtonActiveClass = 'scale-105 bg-[var(--color-secondary)] shadow-[0_4px_12px_rgba(0,0,0,0.12)]'
 
 export default function Menu() {
   const { user } = useAuth()
@@ -54,18 +41,10 @@ export default function Menu() {
     try {
       if (item.log_id) {
         const res = await toggleLike(item.log_id)
-        setItems((prev) =>
-          prev.map((r) =>
-            r.id === item.id ? { ...r, is_liked: res.liked } : r
-          )
-        )
+        setItems((prev) => prev.map((r) => r.id === item.id ? { ...r, is_liked: res.liked } : r))
       } else {
         const res = await createLikeLog(item.id)
-        setItems((prev) =>
-          prev.map((r) =>
-            r.id === item.id ? { ...r, is_liked: true, log_id: res.log_id } : r
-          )
-        )
+        setItems((prev) => prev.map((r) => r.id === item.id ? { ...r, is_liked: true, log_id: res.log_id } : r))
       }
     } catch (err) {
       console.error('찜하기 실패:', err)
@@ -76,7 +55,7 @@ export default function Menu() {
     setLoading(true)
     getRestaurants({ cat: activeCat, q, page, sort })
       .then((d) => { setItems(d.items ?? []); setPagination(d) })
-      .catch(() => { })
+      .catch(() => {})
       .finally(() => setLoading(false))
   }, [activeCat, q, page, sort])
 
@@ -94,12 +73,22 @@ export default function Menu() {
 
   const handleSearch = async () => {
     const keyword = searchInput.trim()
-    
     if (keyword) {
+      try {
+        const saved = localStorage.getItem('trendKeywords')
+        const keywords = saved ? JSON.parse(saved) : []
+        const exists = keywords.find(k => k.name === keyword)
+        const updated = exists
+          ? keywords.map(k => k.name === keyword ? { ...k, count: k.count + 1 } : k)
+          : [...keywords, { name: keyword, count: 1 }]
+        localStorage.setItem('trendKeywords', JSON.stringify(
+          updated.sort((a, b) => b.count - a.count).slice(0, 8)
+        ))
+      } catch {}
       try {
         await api.post('/api/menu/search/log', { keyword })
       } catch (err) {
-        console.error("메뉴 검색 로그 저장 실패:", err)
+        console.error('메뉴 검색 로그 저장 실패:', err)
       }
     }
     go({ q: searchInput, page: 1 })
@@ -137,7 +126,7 @@ export default function Menu() {
                 <img
                   src={CAT_ICON[c]}
                   alt={c}
-                  className="h-6 w-7 pl-0 object-contain "
+                  className="h-6 w-7 pl-0 object-contain"
                   onError={(e) => { e.target.style.display = 'none' }}
                 />
               )}
@@ -147,7 +136,7 @@ export default function Menu() {
         </div>
       </div>
 
-      {/* 검색창 및 정렬 필터 */}
+      {/* 검색창 + 정렬 */}
       <div className="mb-8 flex flex-wrap items-center justify-between gap-3">
         <div className="w-full max-w-[420px]">
           <form
