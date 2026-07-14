@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { createLikeLog, getNearby, getRestaurants, getTrending, toggleFavorite, getMyFavorites, toggleFavoriteAction } from '../api/services'
+import { createLikeLog, getNearby, getRestaurants, getTrending, toggleFavorite, getMyFavorites, toggleFavoriteAction,  getTrendingClicks, getRealtimeTrending  } from '../api/services'
 import { useAuth } from '../App'
 import KakaoMap from '../components/KakaoMap'
 import RestaurantSearch from '../components/RestaurantSearch'
@@ -110,16 +110,18 @@ export default function Home() {
 
   // 🚀 2. 새로 추가: 진짜 백엔드 24시간 실시간 트렌드 키워드를 로드하는 함수
   const fetchTrendingKeywords = async () => {
-    try {
-      const response = await api.get('/api/menu/trending/keywords')
-      if (response.data && Array.isArray(response.data.items)) {
-        setTrendKeywords(response.data.items)
-      }
-    } catch (err) {
-      console.error('실시간 트렌드 키워드 로드 실패:', err)
-      setTrendKeywords([])
+  try {
+    const data = await getRealtimeTrending()
+
+    if (Array.isArray(data.items)) {
+      setTrendKeywords(data.items)
     }
+
+  } catch (err) {
+    console.error('실시간 인기 데이터 로드 실패:', err)
+    setTrendKeywords([])
   }
+}
 
   // 🚀 3. 새로 추가: 인기 검색어판의 키워드를 직접 클릭했을 때도 점수 반영하는 함수
   const handleKeywordClick = async (keyword) => {
@@ -235,7 +237,9 @@ export default function Home() {
   };
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-6 max-[540px]:pb-0">
+
+    <main className="mx-auto w-full max-w-7xl px-4  lg:py-6">
+
       <div className="home-page">
         <section className={heroLayoutClass}>
           <div className={mainBannerClass}>
@@ -331,7 +335,7 @@ export default function Home() {
           </div>
 
           <aside className={trendCardClass}>
-            <h4 className={trendTitleClass}>실시간 인기 검색어</h4>
+            <h4 className={trendTitleClass}>실시간 인기 키워드</h4>
             <div className={trendListClass}>
               {trendKeywords.map((item, i) => (
                 <Link
