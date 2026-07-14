@@ -393,7 +393,6 @@ export default function MyPage() {
             <div className="mt-2 text-[.82rem] font-bold text-[var(--text-secondary)]">찜한 메뉴</div>
             <div className="mt-1 flex items-center justify-between text-[.70rem] font-semibold text-[var(--text-muted)] max-[540px]:hidden">
               <span>총 {displayLikedLogs.length}개 찜함</span>
-              <span>›</span>
             </div>
           </div>
         </button>
@@ -407,7 +406,6 @@ export default function MyPage() {
             <div className="mt-2 text-[.82rem] font-bold text-[var(--text-secondary)]">추천 활동</div>
             <div className="mt-1 flex items-center justify-between text-[.70rem] font-semibold text-[var(--text-muted)] max-[540px]:hidden">
               <span>최근 추천 {rec_logs.length}회</span>
-              <span>›</span>
             </div>
           </div>
         </div>
@@ -423,7 +421,6 @@ export default function MyPage() {
             <div className="mt-2 text-[.82rem] font-bold text-[var(--text-secondary)]">매칭 기록</div>
             <div className="mt-1 flex items-center justify-between text-[.70rem] font-semibold text-[var(--text-muted)] max-[540px]:hidden">
               <span>완료된 파티 {my_parties.length}건</span>
-              <span>›</span>
             </div>
           </div>
         </button>
@@ -440,7 +437,6 @@ export default function MyPage() {
             <div className="mt-1 hidden truncate text-[.68rem] font-bold text-[var(--text-secondary)] max-[540px]:block">리뷰</div>
             <div className="mt-1 flex items-center justify-between text-[.70rem] font-semibold text-[var(--text-muted)] max-[540px]:hidden">
               <span>리뷰 보러가기</span>
-              <span>›</span>
             </div>
           </div>
         </button>
