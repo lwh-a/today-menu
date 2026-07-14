@@ -416,7 +416,11 @@ export default function MyPage() {
           </div>
         </div>
 
-        <div className="relative min-h-[112px] w-full rounded-[var(--border-radius-lg)] border border-[var(--border-color)] bg-[var(--bg-white)] px-5 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#ff6b6b] hover:shadow-md max-[540px]:min-h-[86px] max-[540px]:px-2 max-[540px]:pb-3 max-[540px]:pt-8 max-[540px]:text-center max-[540px]:[&>span:first-child]:left-1/2 max-[540px]:[&>span:first-child]:top-2 max-[540px]:[&>span:first-child]:h-6 max-[540px]:[&>span:first-child]:w-6 max-[540px]:[&>span:first-child]:-translate-x-1/2 max-[540px]:[&>span:first-child]:text-sm">
+        <button
+          type="button"
+          className="relative min-h-[112px] w-full rounded-[var(--border-radius-lg)] border border-[var(--border-color)] bg-[var(--bg-white)] px-5 py-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-[#ff6b6b] hover:shadow-md max-[540px]:min-h-[86px] max-[540px]:px-2 max-[540px]:pb-3 max-[540px]:pt-8 max-[540px]:text-center max-[540px]:[&>span:first-child]:left-1/2 max-[540px]:[&>span:first-child]:top-2 max-[540px]:[&>span:first-child]:h-6 max-[540px]:[&>span:first-child]:w-6 max-[540px]:[&>span:first-child]:-translate-x-1/2 max-[540px]:[&>span:first-child]:text-sm"
+          onClick={() => navigate('/party')}
+        >
           <span className="absolute left-5 top-5 grid h-10 w-10 place-items-center rounded-full bg-[#FFF5F5] text-lg text-[var(--color-danger)]">👥</span>
           <div className="pl-14 pt-1 max-[540px]:pl-0 max-[540px]:pt-0 max-[540px]:[&>div:first-child]:text-xl max-[540px]:[&>div:nth-child(2)]:mt-1 max-[540px]:[&>div:nth-child(2)]:truncate max-[540px]:[&>div:nth-child(2)]:text-[.68rem]">
             <div className="text-2xl font-black leading-none text-[var(--text-primary)]">{my_parties.length}</div>
@@ -426,7 +430,7 @@ export default function MyPage() {
               <span>›</span>
             </div>
           </div>
-        </div>
+        </button>
 
         <button
           type="button"
